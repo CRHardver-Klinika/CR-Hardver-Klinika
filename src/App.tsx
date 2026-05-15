@@ -13,6 +13,7 @@ const IMAGES = {
   gpu: "/gpu_zoom.png",
   devices: "/devices.png",
   logo: "/logo.png",
+  workshop: "https://images.unsplash.com/photo-1591488320449-011701bb6704?q=80&w=1920&auto=format&fit=crop",
 };
 
 /* 
@@ -66,10 +67,6 @@ export default function App() {
               className="h-18 w-auto object-contain block relative z-10"
               referrerPolicy="no-referrer"
             />
-            <div className="hidden sm:block border-l border-gray-200 pl-6 relative z-10">
-              <h1 className="text-black font-extrabold tracking-tighter text-2xl uppercase leading-none">CR Hardver Klinika</h1>
-              <p className="text-xs text-brand-cyan font-bold tracking-[0.3em] uppercase mt-1">Prémium Műszaki Szolgáltatás</p>
-            </div>
           </div>
           <ul className="flex items-center gap-8">
             {[
@@ -126,8 +123,11 @@ export default function App() {
               <h2 className="text-5xl md:text-8xl font-bold text-white tracking-tighter mb-4">
                 CR HARDVER <span className="text-brand-teal">KLINIKA</span>
               </h2>
+              <p className="text-xl md:text-2xl text-brand-cyan max-w-3xl font-bold tracking-tight mb-2">
+                Lassú? Hangos? Melegszik? – Ne várja meg, amíg elfüstöl!
+              </p>
               <p className="text-lg md:text-xl text-slate-300 max-w-2xl font-light tracking-wide">
-                Professzionális hardver szerviz, ahol a technológia életre kel. 
+                Professzionális hardver szerviz és karbantartás, mielőtt késő lenne. 
                 Görgess lefelé a bepillantáshoz.
               </p>
               <div className="mt-12 animate-bounce">
@@ -277,29 +277,48 @@ export default function App() {
       </section>
 
       {/* Workshop Branding Section */}
-      <section id="workshop" className="relative h-screen bg-black overflow-hidden flex items-center justify-center">
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{ 
-            backgroundImage: `url(${IMAGES.logo})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            filter: 'grayscale(1) invert(1)'
-          }}
-        />
-        <div className="relative z-10 text-center space-y-8 px-6">
-          <motion.img 
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            viewport={{ once: true }}
-            src={IMAGES.logo} 
-            alt="Main Logo"
-            className="h-64 mx-auto object-contain mb-12 drop-shadow-[0_0_50px_rgba(255,255,255,0.1)]"
+      <section id="workshop" className="relative py-48 bg-black overflow-hidden flex items-center justify-center">
+        <div className="absolute inset-0">
+          <img 
+            src={IMAGES.workshop} 
+            alt="Home Workshop" 
+            className="w-full h-full object-cover opacity-40 grayscale-[0.5]"
             referrerPolicy="no-referrer"
           />
-          <div className="space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-widest uppercase">MŰHELYÜNK NYITVA ÁLL</h2>
-            <p className="text-brand-cyan text-lg md:text-2xl font-medium tracking-[0.5em] uppercase">Hétfő - Péntek: 09:00 - 18:00</p>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black" />
+          <div className="absolute inset-0 bg-brand-teal/5 mix-blend-overlay" />
+        </div>
+        
+        <div className="relative z-10 text-center max-w-4xl px-6 space-y-12">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="space-y-6"
+          >
+            <span className="text-brand-cyan font-bold tracking-[0.5em] uppercase text-xs">A Műhely</span>
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-tight">
+              SZALON MINŐSÉG <br /> <span className="text-brand-teal">OTTHONI KÖRNYEZETBEN</span>
+            </h2>
+            <p className="text-slate-300 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
+              Nem egy rideg nagyüzem, hanem egy dedikált, professzionális szervizstúdió, 
+              ahol minden egyes gépnek megadjuk a szükséges időt és precíziót. 
+              Modern technológia, halk munkamenet, maximális odafigyelés.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 border-t border-white/10">
+            {[
+              { label: "Nyitvatartás", val: "09:00 - 18:00" },
+              { label: "Átfutási idő", val: "24-48 óra" },
+              { label: "Garancia", val: "100% Bizalom" },
+              { label: "Környezet", val: "Portalanított" }
+            ].map((stat, i) => (
+              <div key={i} className="space-y-1">
+                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">{stat.label}</p>
+                <p className="text-white font-bold text-sm md:text-base">{stat.val}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
