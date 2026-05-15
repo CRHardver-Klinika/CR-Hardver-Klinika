@@ -7,7 +7,6 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin } from "lucide-react";
 
-// Image mapping based on the provided assets
 const IMAGES = {
   hero: "/hero.png",
   cpu: "/cpu_detail.png",
@@ -15,6 +14,14 @@ const IMAGES = {
   devices: "/devices.png",
   logo: "/logo.png",
 };
+
+/* 
+  ELŐNÉZET (Preview) JAVÍTÁSA:
+  1. A bal oldali fájlkezelőben kattints a 'public' mappára.
+  2. Töltsd fel (Drag & Drop) a képeidet ide.
+  3. FIGYELEM: A screenshotodon láttam, hogy a fájljaid neve 'hero.png.png'. 
+     Nevezd át őket, hogy csak egyszer szerepeljen bennük a .png (pl. 'hero.png')!
+*/
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,18 +57,18 @@ export default function App() {
   return (
     <div className="relative bg-black" id="top">
       {/* Navigation - Recreating the style from hero.png */}
-      <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl py-3 px-8 flex items-center justify-between shadow-2xl border border-white/20">
-          <div className="flex items-center gap-3">
+      <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl py-4 px-10 flex items-center justify-between shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/20">
+          <div className="flex items-center gap-4">
             <img 
               src={IMAGES.logo} 
               alt="CR Logo" 
-              className="h-10 w-auto object-contain"
+              className="h-12 w-auto object-contain block relative z-10"
               referrerPolicy="no-referrer"
             />
-            <div className="hidden sm:block">
-              <h1 className="text-black font-bold tracking-tighter text-sm uppercase">CR Hardver Klinika</h1>
-              <p className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">Premium Tech Service</p>
+            <div className="hidden sm:block border-l border-gray-200 pl-4 relative z-10">
+              <h1 className="text-black font-extrabold tracking-tighter text-base uppercase leading-none">CR Hardver Klinika</h1>
+              <p className="text-[10px] text-brand-cyan font-bold tracking-[0.2em] uppercase mt-1">Premium Tech Service</p>
             </div>
           </div>
           <ul className="flex items-center gap-6">
@@ -86,7 +93,7 @@ export default function App() {
           
           {/* Layer 1: Hero (Workshop) */}
           <motion.div 
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center bg-neutral-900"
             style={{ 
               scale: heroScale, 
               opacity: heroOpacity,
@@ -97,8 +104,9 @@ export default function App() {
             <img 
               src={IMAGES.hero} 
               alt="Workshop" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover opacity-80"
               referrerPolicy="no-referrer"
+              loading="eager"
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <motion.div 
@@ -124,14 +132,15 @@ export default function App() {
 
           {/* Layer 2: CPU Detail */}
           <motion.div 
-            className="absolute inset-0 flex items-center justify-center p-0"
+            className="absolute inset-0 flex items-center justify-center p-0 bg-neutral-900"
             style={{ scale: cpuScale, opacity: cpuOpacity }}
           >
             <img 
               src={IMAGES.cpu} 
               alt="CPU Detail" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover opacity-90"
               referrerPolicy="no-referrer"
+              loading="eager"
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />

@@ -47,8 +47,12 @@
         const { useRef, useEffect } = React;
         const { motion, useScroll, useTransform, useSpring } = FramerMotion;
 
-        // FONTOS: Ha GitHub-on használod, nevezd el a képeidet így, 
-        // és rakd őket ugyanabba a mappába, mint ezt az index.html fájlt!
+        /* 
+          TELEPÍTÉSI ÚTMUTATÓ (Végleges):
+          1. Nevezd át ezt a fájlt "index.html"-re.
+          2. Másold a képeket (hero.png, cpu_detail.png stb.) KÖZVETLENÜL az index.html mellé.
+          3. Így a Vercel/GitHub azonnal meg fogja találni őket.
+        */
         const IMAGES = {
             hero: "hero.png",
             cpu: "cpu_detail.png",
@@ -80,30 +84,37 @@
                 restDelta: 0.001
             });
 
-            const heroScale = useTransform(smoothProgress, [0, 0.25], [1, 3.5]);
-            const heroOpacity = useTransform(smoothProgress, [0.15, 0.3], [1, 0]);
-            const cpuScale = useTransform(smoothProgress, [0.15, 0.3, 0.5, 0.6], [0.8, 1, 1.2, 2]);
-            const cpuOpacity = useTransform(smoothProgress, [0.2, 0.3, 0.55, 0.65], [0, 1, 1, 0]);
-            const gpuScale = useTransform(smoothProgress, [0.5, 0.65, 0.8, 0.9], [0.8, 1, 1.2, 2]);
-            const gpuOpacity = useTransform(smoothProgress, [0.5, 0.6, 0.85, 0.95], [0, 1, 1, 0]);
-            const devicesScale = useTransform(smoothProgress, [0.8, 0.95, 1], [1.2, 1, 1]);
-            const devicesOpacity = useTransform(smoothProgress, [0.85, 0.95], [0, 1]);
+            // Hero zoom effekt
+            const heroScale = useTransform(smoothProgress, [0, 0.25], [1, 4]);
+            const heroOpacity = useTransform(smoothProgress, [0.2, 0.35], [1, 0]);
+            
+            // CPU fókusz
+            const cpuScale = useTransform(smoothProgress, [0.15, 0.35, 0.55, 0.65], [0.8, 1, 1.1, 2]);
+            const cpuOpacity = useTransform(smoothProgress, [0.25, 0.35, 0.55, 0.65], [0, 1, 1, 0]);
+            
+            // GPU fókusz
+            const gpuScale = useTransform(smoothProgress, [0.55, 0.7, 0.85, 0.95], [0.8, 1, 1.1, 2]);
+            const gpuOpacity = useTransform(smoothProgress, [0.6, 0.7, 0.85, 0.95], [0, 1, 1, 0]);
+            
+            // Devices (Végeszközök)
+            const devicesScale = useTransform(smoothProgress, [0.85, 0.95, 1], [1.2, 1, 1]);
+            const devicesOpacity = useTransform(smoothProgress, [0.9, 1], [0, 1]);
 
             return (
-                <div className="relative font-sans">
-                    <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
-                        <div className="bg-white/90 backdrop-blur-md rounded-2xl py-3 px-8 flex items-center justify-between shadow-2xl border border-white/20">
-                            <div className="flex items-center gap-3">
-                                <img src={IMAGES.logo} alt="Logo" className="h-10 w-auto" />
-                                <div className="hidden sm:block">
-                                    <h1 className="text-black font-bold tracking-tighter text-sm uppercase">CR Hardver Klinika</h1>
-                                    <p className="text-[10px] text-gray-500 font-medium tracking-widest uppercase">Premium Tech Service</p>
+                <div className="relative font-sans bg-black">
+                    <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl">
+                        <div className="bg-white/95 backdrop-blur-xl rounded-2xl py-4 px-10 flex items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/20">
+                            <div className="flex items-center gap-4">
+                                <img src={IMAGES.logo} alt="Logo" className="h-12 w-auto" />
+                                <div className="hidden sm:block border-l border-gray-200 pl-4">
+                                    <h1 className="text-black font-extrabold tracking-tighter text-base uppercase leading-none">CR Hardver Klinika</h1>
+                                    <p className="text-[10px] text-brand-cyan font-bold tracking-[0.2em] uppercase mt-1">Premium Tech Service</p>
                                 </div>
                             </div>
                             <ul className="flex items-center gap-6">
                                 {['Home', 'Services', 'Portfolio', 'Contact'].map((item) => (
                                     <li key={item}>
-                                        <a href={`#${item.toLowerCase()}`} className="text-black/70 hover:text-black transition-colors font-semibold text-xs tracking-widest uppercase">[{item}]</a>
+                                        <a href={`#${item.toLowerCase()}`} className="text-black/70 hover:text-black transition-colors font-bold text-xs tracking-widest uppercase">[{item}]</a>
                                     </li>
                                 ))}
                             </ul>
@@ -115,62 +126,69 @@
                             <motion.div className="absolute inset-0 flex items-center justify-center" style={{ scale: heroScale, opacity: heroOpacity }}>
                                 <img src={IMAGES.hero} alt="Workshop" className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 cinematic-vignette" />
-                                <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-center px-4">
-                                    <h2 className="text-5xl md:text-8xl font-bold text-white tracking-tighter mb-4 drop-shadow-2xl">CR HARDVER <span className="text-brand-teal">KLINIKA</span></h2>
-                                    <p className="text-lg md:text-xl text-slate-200 max-w-2xl font-medium tracking-wide drop-shadow-lg uppercase">MŰhelyünk ahol a technológia életre kel</p>
+                                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center px-4">
+                                    <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter mb-4 drop-shadow-2xl">CR HARDVER <span className="text-brand-teal">KLINIKA</span></h2>
+                                    <p className="text-lg md:text-2xl text-white max-w-2xl font-medium tracking-widest uppercase drop-shadow-lg">A technológia szentélye</p>
                                 </div>
                             </motion.div>
 
                             <motion.div className="absolute inset-0 flex items-center justify-center" style={{ scale: cpuScale, opacity: cpuOpacity }}>
                                 <img src={IMAGES.cpu} alt="CPU" className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 cinematic-vignette" />
-                                <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-full max-w-4xl px-8">
-                                    <h3 className="text-4xl md:text-6xl font-bold text-white tracking-tight uppercase">PRECÍZIÓS HŰTÉS</h3>
+                                <div className="absolute bottom-32 left-12">
+                                    <h3 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-2xl">PRECÍZIÓS<br/><span className="text-brand-teal">HŰTÉS</span></h3>
                                 </div>
                             </motion.div>
 
                             <motion.div className="absolute inset-0 flex items-center justify-center" style={{ scale: gpuScale, opacity: gpuOpacity }}>
                                 <img src={IMAGES.gpu} alt="GPU" className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 cinematic-vignette" />
-                                <div className="absolute top-48 left-12">
-                                    <h3 className="text-5xl md:text-7xl font-bold text-white tracking-tighter uppercase leading-none">ULTRA<br/>GRAFIKA</h3>
+                                <div className="absolute top-48 right-12 text-right">
+                                    <h3 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase leading-none drop-shadow-2xl text-right">ULTRA<br/><span className="text-brand-cyan">GRAFIKA</span></h3>
                                 </div>
                             </motion.div>
 
                             <motion.div className="absolute inset-0 flex items-center justify-center bg-black" style={{ scale: devicesScale, opacity: devicesOpacity }}>
                                 <img src={IMAGES.devices} alt="Devices" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 cinematic-vignette opacity-40" />
-                                <div className="absolute bottom-24 right-12 text-right">
-                                    <h3 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-4 uppercase">KLINIKAI<br/>ELLÁTÁS</h3>
+                                <div className="absolute inset-0 cinematic-vignette opacity-50" />
+                                <div className="absolute inset-x-0 bottom-32 text-center">
+                                    <h3 className="text-4xl md:text-7xl font-black text-white tracking-tight uppercase mb-6">KLINIKAI ELLÁTÁS</h3>
+                                    <button className="bg-brand-teal text-black font-black px-12 py-4 rounded-full text-sm uppercase tracking-[0.3em] hover:bg-white transition-all shadow-[0_0_30px_rgba(8,247,254,0.4)]">Időpontfoglalás</button>
                                 </div>
                             </motion.div>
                         </div>
                     </main>
 
-                    <section id="services" className="py-32 bg-black px-6 border-t border-white/5">
+                    <section id="services" className="py-40 bg-black px-6 border-t border-white/5 relative z-20">
                         <div className="max-w-7xl mx-auto text-center">
-                            <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter mb-20 uppercase">Szolgáltatások</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <span className="text-brand-cyan font-black tracking-[0.5em] uppercase text-xs mb-4 block">Szolgáltatások</span>
+                            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter mb-24 uppercase">Amiben a legjobbunk</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                                 {[
-                                    { icon: "activity", title: "Diagnosztika", desc: "Műszeres hiba feltárás." },
-                                    { icon: "cpu", title: "Karbantartás", desc: "Prémium újrapasztázás." },
-                                    { icon: "hard-drive", title: "Bővítés", desc: "SSD és RAM tuning." }
+                                    { icon: "activity", title: "Diagnosztika", desc: "Mérnöki precizitású állapotfelmérés és hiba-analízis." },
+                                    { icon: "cpu", title: "Karbantartás", desc: "A legmagasabb szintű újrapasztázás és portalanítás." },
+                                    { icon: "hard-drive", title: "Maximalizálás", desc: "SSD, RAM és komponens tuning a csúcsteljesítményért." }
                                 ].map((s, i) => (
-                                    <div key={i} className="p-10 bg-white/5 rounded-3xl border border-white/10 hover:border-brand-teal/30 transition-all">
-                                        <div className="w-16 h-16 bg-brand-teal/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-brand-teal">
-                                            <Icon name={s.icon} className="w-8 h-8" />
+                                    <div key={i} className="group p-12 bg-white/5 rounded-[2rem] border border-white/10 hover:border-brand-teal/40 transition-all duration-500 hover:-translate-y-4">
+                                        <div className="w-20 h-20 bg-brand-teal/10 rounded-3xl flex items-center justify-center mx-auto mb-8 text-brand-teal group-hover:bg-brand-teal group-hover:text-black transition-all duration-500">
+                                            <Icon name={s.icon} className="w-10 h-10" />
                                         </div>
-                                        <h4 className="text-2xl font-bold text-white mb-4">{s.title}</h4>
-                                        <p className="text-slate-400 font-light">{s.desc}</p>
+                                        <h4 className="text-3xl font-black text-white mb-6 uppercase tracking-tight">{s.title}</h4>
+                                        <p className="text-slate-400 font-light text-lg leading-relaxed">{s.desc}</p>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </section>
 
-                    <footer className="bg-[#050505] py-20 px-6 text-center border-t border-white/5">
-                        <img src={IMAGES.logo} alt="Logo" className="h-16 mx-auto mb-8 invert opacity-50" />
-                        <p className="text-slate-500 text-sm tracking-widest uppercase">&copy; 2024 CR Hardver Klinika</p>
+                    <footer className="bg-[#050505] py-24 px-6 text-center border-t border-white/5 relative z-20">
+                        <img src={IMAGES.logo} alt="Logo" className="h-20 mx-auto mb-12 invert opacity-50" />
+                        <div className="flex justify-center gap-8 mb-12">
+                           <a href="#" className="text-slate-500 hover:text-brand-cyan transition-colors text-xs font-black tracking-widest uppercase">Facebook</a>
+                           <a href="#" className="text-slate-500 hover:text-brand-cyan transition-colors text-xs font-black tracking-widest uppercase">Instagram</a>
+                           <a href="#" className="text-slate-500 hover:text-brand-cyan transition-colors text-xs font-black tracking-widest uppercase">LinkedIn</a>
+                        </div>
+                        <p className="text-slate-600 text-[10px] tracking-[0.4em] font-black uppercase">&copy; 2024 CR Hardver Klinika | Precision Engine</p>
                     </footer>
                 </div>
             );
