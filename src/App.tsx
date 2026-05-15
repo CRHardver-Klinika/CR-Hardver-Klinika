@@ -57,28 +57,36 @@ export default function App() {
   return (
     <div className="relative bg-black" id="top">
       {/* Navigation - Recreating the style from hero.png */}
-      <nav className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl">
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl py-4 px-10 flex items-center justify-between shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/20">
-          <div className="flex items-center gap-4">
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-7xl">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl py-6 px-12 flex items-center justify-between shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-white/30">
+          <div className="flex items-center gap-6">
             <img 
               src={IMAGES.logo} 
               alt="CR Logo" 
-              className="h-12 w-auto object-contain block relative z-10"
+              className="h-16 w-auto object-contain block relative z-10"
               referrerPolicy="no-referrer"
             />
-            <div className="hidden sm:block border-l border-gray-200 pl-4 relative z-10">
-              <h1 className="text-black font-extrabold tracking-tighter text-base uppercase leading-none">CR Hardver Klinika</h1>
-              <p className="text-[10px] text-brand-cyan font-bold tracking-[0.2em] uppercase mt-1">Premium Tech Service</p>
+            <div className="hidden sm:block border-l border-gray-200 pl-6 relative z-10">
+              <h1 className="text-black font-extrabold tracking-tighter text-xl uppercase leading-none">CR Hardver Klinika</h1>
+              <p className="text-[11px] text-brand-cyan font-bold tracking-[0.3em] uppercase mt-1">Prémium Műszaki Szolgáltatás</p>
             </div>
           </div>
-          <ul className="flex items-center gap-6">
-            {['Home', 'Services', 'Portfolio', 'Workshop', 'Contact'].map((item) => (
-              <li key={item}>
+          <ul className="flex items-center gap-8">
+            {[
+              { label: 'Főoldal', id: 'top' },
+              { label: 'Szolgáltatások', id: 'services' },
+              { label: 'Portfólió', id: 'portfolio' },
+              { label: 'Műhely', id: 'workshop' },
+              { label: 'Kapcsolat', id: 'contact' }
+            ].map((item) => (
+              <li key={item.id}>
                 <a 
-                  href={`#${item.toLowerCase()}`} 
-                  className="text-black/70 hover:text-black transition-colors font-semibold text-xs tracking-widest uppercase"
+                  href={`#${item.id}`} 
+                  className="text-black/70 hover:text-black transition-colors font-bold text-xs tracking-widest uppercase flex items-center gap-2"
                 >
-                  [{item}]
+                  <span className="opacity-30">[</span>
+                  {item.label}
+                  <span className="opacity-30">]</span>
                 </a>
               </li>
             ))}
@@ -316,16 +324,22 @@ export default function App() {
             </div>
             
             <div className="space-y-6">
-              <h5 className="text-white font-bold tracking-widest text-sm uppercase">Quick Links</h5>
+              <h5 className="text-white font-bold tracking-widest text-sm uppercase">Gyorshivatkozások</h5>
               <ul className="space-y-4 text-slate-400 text-sm font-light">
-                {['Home', 'Services', 'Portfolio', 'Workshop', 'Contact'].map(link => (
-                  <li key={link}><a href={`#${link.toLowerCase()}`} className="hover:text-brand-teal transition-colors">{link}</a></li>
+                {[
+                  { label: 'Főoldal', id: 'top' },
+                  { label: 'Szolgáltatások', id: 'services' },
+                  { label: 'Portfólió', id: 'portfolio' },
+                  { label: 'Műhely', id: 'workshop' },
+                  { label: 'Kapcsolat', id: 'contact' }
+                ].map(link => (
+                  <li key={link.id}><a href={`#${link.id}`} className="hover:text-brand-teal transition-colors">{link.label}</a></li>
                 ))}
               </ul>
             </div>
 
             <div className="space-y-6">
-              <h5 className="text-white font-bold tracking-widest text-sm uppercase">Contact Info</h5>
+              <h5 className="text-white font-bold tracking-widest text-sm uppercase">Elérhetőség</h5>
               <ul className="space-y-6 text-slate-400 text-sm font-light">
                 <li className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-teal">
@@ -350,8 +364,8 @@ export default function App() {
           </div>
           
           <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-[0.2em] text-slate-600">
-            <p>&copy; 2024 CR HARDVER KLINIKA. ALL RIGHTS RESERVED.</p>
-            <p>DESIGNED FOR PERFORMANCE</p>
+            <p>&copy; 2024 CR HARDVER KLINIKA. MINDEN JOG FENNTARTVA.</p>
+            <p>MAXIMÁLIS TELJESÍTMÉNYRE TERVEZVE</p>
           </div>
         </div>
       </footer>
