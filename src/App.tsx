@@ -8,12 +8,13 @@ import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin } from "lucide-react";
 
 // Image mapping based on the provided assets
-const IMAGES = [
-  "/input_file_3.png", // hero (Workshop)
-  "/input_file_0.png", // cpu_detail
-  "/input_file_2.png", // gpu_zoom
-  "/input_file_1.png", // devices
-];
+const IMAGES = {
+  hero: "input_file_3.png",
+  cpu: "input_file_0.png",
+  gpu: "input_file_2.png",
+  devices: "input_file_1.png",
+  logo: "input_file_4.png",
+};
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,9 +54,10 @@ export default function App() {
         <div className="bg-white/90 backdrop-blur-md rounded-2xl py-3 px-8 flex items-center justify-between shadow-2xl border border-white/20">
           <div className="flex items-center gap-3">
             <img 
-              src="/input_file_4.png" 
+              src={IMAGES.logo} 
               alt="CR Logo" 
               className="h-10 w-auto object-contain"
+              referrerPolicy="no-referrer"
             />
             <div className="hidden sm:block">
               <h1 className="text-black font-bold tracking-tighter text-sm uppercase">CR Hardver Klinika</h1>
@@ -93,9 +95,10 @@ export default function App() {
             }}
           >
             <img 
-              src={IMAGES[0]} 
+              src={IMAGES.hero} 
               alt="Workshop" 
               className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <motion.div 
@@ -125,9 +128,10 @@ export default function App() {
             style={{ scale: cpuScale, opacity: cpuOpacity }}
           >
             <img 
-              src={IMAGES[1]} 
+              src={IMAGES.cpu} 
               alt="CPU Detail" 
               className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
@@ -152,9 +156,10 @@ export default function App() {
             style={{ scale: gpuScale, opacity: gpuOpacity }}
           >
             <img 
-              src={IMAGES[2]} 
+              src={IMAGES.gpu} 
               alt="GPU" 
               className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
@@ -189,9 +194,10 @@ export default function App() {
             style={{ scale: devicesScale, opacity: devicesOpacity }}
           >
             <img 
-              src={IMAGES[3]} 
+              src={IMAGES.devices} 
               alt="Console and Laptop" 
               className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none opacity-40" />
             
@@ -258,7 +264,7 @@ export default function App() {
         <div 
           className="absolute inset-0 opacity-20"
           style={{ 
-            backgroundImage: `url(/input_file_4.png)`,
+            backgroundImage: `url(${IMAGES.logo})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             filter: 'grayscale(1) invert(1)'
@@ -269,9 +275,10 @@ export default function App() {
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
-            src="/input_file_4.png" 
+            src={IMAGES.logo} 
             alt="Main Logo"
             className="h-64 mx-auto object-contain mb-12 drop-shadow-[0_0_50px_rgba(255,255,255,0.1)]"
+            referrerPolicy="no-referrer"
           />
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-widest uppercase">MŰHELYÜNK NYITVA ÁLL</h2>
@@ -285,7 +292,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
             <div className="col-span-1 md:col-span-2 space-y-8">
-              <img src="/input_file_4.png" alt="CR Logo" className="h-16 invert opacity-80" />
+              <img src={IMAGES.logo} alt="CR Logo" className="h-16 invert opacity-80" referrerPolicy="no-referrer" />
               <p className="text-slate-400 text-lg font-light leading-relaxed max-w-md">
                 A technológia bonyolult, mi egyszerűvé tesszük a kényelmet. 
                 Várunk szeretettel modern klinikánkon.
