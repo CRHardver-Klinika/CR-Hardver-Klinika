@@ -57,18 +57,18 @@ export default function App() {
   return (
     <div className="relative bg-black" id="top">
       {/* Navigation - Recreating the style from hero.png */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-7xl">
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl py-6 px-12 flex items-center justify-between shadow-[0_40px_80px_rgba(0,0,0,0.6)] border border-white/30">
+      <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-7xl">
+        <div className="bg-white/95 backdrop-blur-xl rounded-b-3xl py-8 px-12 flex items-center justify-between shadow-[0_40px_80px_rgba(0,0,0,0.6)] border-x border-b border-white/30">
           <div className="flex items-center gap-6">
             <img 
               src={IMAGES.logo} 
               alt="CR Logo" 
-              className="h-16 w-auto object-contain block relative z-10"
+              className="h-18 w-auto object-contain block relative z-10"
               referrerPolicy="no-referrer"
             />
             <div className="hidden sm:block border-l border-gray-200 pl-6 relative z-10">
-              <h1 className="text-black font-extrabold tracking-tighter text-xl uppercase leading-none">CR Hardver Klinika</h1>
-              <p className="text-[11px] text-brand-cyan font-bold tracking-[0.3em] uppercase mt-1">Prémium Műszaki Szolgáltatás</p>
+              <h1 className="text-black font-extrabold tracking-tighter text-2xl uppercase leading-none">CR Hardver Klinika</h1>
+              <p className="text-xs text-brand-cyan font-bold tracking-[0.3em] uppercase mt-1">Prémium Műszaki Szolgáltatás</p>
             </div>
           </div>
           <ul className="flex items-center gap-8">
