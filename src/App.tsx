@@ -9,11 +9,11 @@ import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin } from "luc
 
 // Image mapping based on the provided assets
 const IMAGES = {
-  hero: "input_file_3.png",
-  cpu: "input_file_0.png",
-  gpu: "input_file_2.png",
-  devices: "input_file_1.png",
-  logo: "input_file_4.png",
+  hero: "/hero.png",
+  cpu: "/cpu_detail.png",
+  gpu: "/gpu_zoom.png",
+  devices: "/devices.png",
+  logo: "/logo.png",
 };
 
 export default function App() {
