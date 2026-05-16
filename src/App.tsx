@@ -3,9 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
-import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu } from "lucide-react";
+import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu, LogOut, Settings, Users, Box, MessageSquare } from "lucide-react";
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
+import { auth, loginWithGoogle, logout } from "./lib/firebase";
+import { submitMessage } from "./lib/firestore";
+import { onAuthStateChanged, User } from "firebase/auth";
+
+import Dashboard from "./components/admin/Dashboard";
 
 const IMAGES = {
   hero: "/hero.png",
@@ -24,7 +30,124 @@ const IMAGES = {
      Nevezd át őket, hogy csak egyszer szerepeljen bennük a .png (pl. 'hero.png')!
 */
 
-export default function App() {
+function ContactForm() {
+  const [formData, setFormData] = useState({ name: '', email: '', content: '' });
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus('sending');
+    try {
+      await submitMessage(formData.name, formData.email, formData.content);
+      setStatus('success');
+      setFormData({ name: '', email: '', content: '' });
+      setTimeout(() => setStatus('idle'), 5000);
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+    }
+  };
+
+  return (
+    <section id="contact" className="py-32 bg-[#0a0a0a] px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <span className="text-brand-teal font-bold tracking-[0.4em] uppercase text-xs">Kapcsolatfelvétel</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-tight">
+                KÉRJEN <br /> <span className="text-brand-cyan">AJÁNLATOT</span>
+              </h2>
+              <p className="text-slate-400 text-lg font-light leading-relaxed max-w-md">
+                Írja meg nekünk, milyen problémát tapasztal, és kollégánk hamarosan felveszi Önnel a kapcsolatot a részletekkel.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:border-brand-teal/30 transition-all">
+                <Phone className="w-6 h-6 text-brand-teal mb-4 group-hover:scale-110 transition-transform" />
+                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Hívjon minket</p>
+                <a href="tel:+36303413836" className="text-white font-bold hover:text-brand-teal transition-colors">+36 30 341 3836</a>
+              </div>
+              <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:border-brand-cyan/30 transition-all">
+                <Mail className="w-6 h-6 text-brand-cyan mb-4 group-hover:scale-110 transition-transform" />
+                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Írjon e-mailt</p>
+                <a href="mailto:info@crhardverklinika.com" className="text-white font-bold hover:text-brand-cyan transition-colors text-xs break-all">info@crhardverklinika.com</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-neutral-900 p-8 md:p-12 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/10 blur-3xl -mr-16 -mt-16" />
+            
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+              <div className="space-y-2">
+                <label className="text-slate-500 text-[10px] uppercase font-bold tracking-widest ml-4">Teljes Név</label>
+                <input 
+                  required
+                  type="text" 
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Kovács János" 
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-brand-teal/50 transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-slate-500 text-[10px] uppercase font-bold tracking-widest ml-4">E-mail Cím</label>
+                <input 
+                  required
+                  type="email" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="janos@pelda.hu" 
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-brand-teal/50 transition-all"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-slate-500 text-[10px] uppercase font-bold tracking-widest ml-4">Hiba leírása / Üzenet</label>
+                <textarea 
+                  required
+                  rows={4}
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Milyen eszközről van szó és mi a hibajelenség?" 
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-brand-teal/50 transition-all resize-none"
+                />
+              </div>
+              
+              <button 
+                type="submit"
+                disabled={status === 'sending'}
+                className="w-full bg-white text-black font-black uppercase tracking-widest p-5 rounded-2xl hover:bg-brand-teal transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {status === 'sending' ? 'Küldés...' : 'Üzenet Küldése'}
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              {status === 'success' && (
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  className="text-brand-teal text-center font-bold text-xs uppercase tracking-widest"
+                >
+                  Köszönjük! Üzenetedet sikeresen fogadtuk.
+                </motion.p>
+              )}
+              {status === 'error' && (
+                <p className="text-red-500 text-center font-bold text-xs uppercase tracking-widest">
+                  Hiba történt. Kérjük próbáld újra később.
+                </p>
+              )}
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LandingPage() {
+  const navigate = useNavigate();
   const [showPrices, setShowPrices] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -57,13 +180,37 @@ export default function App() {
   const devicesScale = useTransform(smoothProgress, [0.8, 0.95, 1], [1.2, 1, 1]);
   const devicesOpacity = useTransform(smoothProgress, [0.85, 0.95], [0, 1]);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setLoginLoading(true);
+    try {
+      const user = await loginWithGoogle();
+      if (user?.email === "Cimpian.Robert.88@gmail.com") {
+        navigate('/admin');
+      }
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdmin(user?.email === "Cimpian.Robert.88@gmail.com");
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="relative bg-black" id="top">
       {/* Navigation - Recreating the style from hero.png */}
       <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-7xl px-0 md:px-4">
         <div className="bg-white/95 backdrop-blur-xl rounded-none md:rounded-b-3xl py-4 md:py-8 px-6 md:px-12 flex items-center justify-between shadow-[0_40px_80px_rgba(0,0,0,0.6)] border-x border-b border-white/30">
           <div className="flex items-center gap-6">
-            <div className="relative group">
+            <Link to="/" className="relative group">
               <div className="absolute -inset-1 bg-black/20 rounded-xl blur-sm group-hover:bg-black/40 transition-all duration-500" />
               <div className="relative bg-black rounded-lg p-2 border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.8)] flex items-center justify-center">
                 <img 
@@ -73,7 +220,7 @@ export default function App() {
                   referrerPolicy="no-referrer"
                 />
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Desktop Menu */}
@@ -83,7 +230,7 @@ export default function App() {
               { label: 'Szolgáltatások', id: 'services' },
               { label: 'Portfólió', id: 'portfolio' },
               { label: 'Műhely', id: 'workshop' },
-              { label: 'Kapcsolat', id: 'contact' }
+              { label: 'Kapcsolat', id: 'footer' }
             ].map((item) => (
               <li key={item.id}>
                 <a 
@@ -96,6 +243,24 @@ export default function App() {
                 </a>
               </li>
             ))}
+            <li>
+              <a 
+                href="#contact" 
+                className="bg-black text-white px-6 py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-brand-teal hover:text-black transition-all shadow-xl shadow-black/10 active:scale-95"
+              >
+                Kérjen ajánlatot
+              </a>
+            </li>
+            {isAdmin && (
+              <li>
+                <Link 
+                  to="/admin" 
+                  className="bg-brand-teal text-black px-6 py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-black hover:text-white transition-all shadow-xl shadow-brand-teal/20"
+                >
+                  Admin
+                </Link>
+              </li>
+            )}
           </ul>
 
           {/* Mobile Toggle */}
@@ -122,18 +287,27 @@ export default function App() {
                   { label: 'Szolgáltatások', id: 'services' },
                   { label: 'Portfólió', id: 'portfolio' },
                   { label: 'Műhely', id: 'workshop' },
-                  { label: 'Kapcsolat', id: 'contact' }
+                  { label: 'Kapcsolat', id: 'footer' }
                 ].map((item) => (
                   <li key={item.id}>
                     <a 
                       href={`#${item.id}`} 
                       onClick={() => setIsMenuOpen(false)}
-                      className="text-black font-black text-lg tracking-widest uppercase block"
+                      className={`text-black font-black text-2xl tracking-widest uppercase block`}
                     >
                       {item.label}
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a 
+                    href="#contact" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-black text-white px-8 py-5 rounded-3xl font-black text-lg tracking-widest uppercase block text-center mt-4"
+                  >
+                    Kérjen ajánlatot
+                  </a>
+                </li>
               </ul>
             </motion.div>
           )}
@@ -485,8 +659,10 @@ export default function App() {
         </div>
       </section>
 
+      <ContactForm />
+
       {/* Footer / Contact */}
-      <footer id="contact" className="bg-[#050505] pt-32 pb-12 px-6 border-t border-white/5">
+      <footer id="footer" className="bg-[#050505] pt-32 pb-12 px-6 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
             <div className="col-span-1 md:col-span-2 space-y-8">
@@ -517,7 +693,7 @@ export default function App() {
                   { label: 'Szolgáltatások', id: 'services' },
                   { label: 'Portfólió', id: 'portfolio' },
                   { label: 'Műhely', id: 'workshop' },
-                  { label: 'Kapcsolat', id: 'contact' }
+                  { label: 'Kapcsolat', id: 'footer' }
                 ].map(link => (
                   <li key={link.id}><a href={`#${link.id}`} className="hover:text-brand-teal transition-colors">{link.label}</a></li>
                 ))}
@@ -556,5 +732,16 @@ export default function App() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/admin" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
