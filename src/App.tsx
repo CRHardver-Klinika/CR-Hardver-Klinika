@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring } from "motion/react";
-import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin } from "lucide-react";
+import { useState, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
+import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight } from "lucide-react";
 
 const IMAGES = {
   hero: "/hero.png",
@@ -25,6 +25,7 @@ const IMAGES = {
 */
 
 export default function App() {
+  const [showPrices, setShowPrices] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -61,12 +62,18 @@ export default function App() {
       <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-full max-w-7xl">
         <div className="bg-white/95 backdrop-blur-xl rounded-b-3xl py-8 px-12 flex items-center justify-between shadow-[0_40px_80px_rgba(0,0,0,0.6)] border-x border-b border-white/30">
           <div className="flex items-center gap-6">
-            <img 
-              src={IMAGES.logo} 
-              alt="CR Logo" 
-              className="h-18 w-auto object-contain block relative z-10"
-              referrerPolicy="no-referrer"
-            />
+            <div className="relative group">
+              {/* Dark Neon Frame Effect */}
+              <div className="absolute -inset-1 bg-black/20 rounded-xl blur-sm group-hover:bg-black/40 transition-all duration-500" />
+              <div className="relative bg-black rounded-lg p-2 border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.8)] flex items-center justify-center">
+                <img 
+                  src={IMAGES.logo} 
+                  alt="CR Logo" 
+                  className="h-14 w-auto object-contain block"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
           </div>
           <ul className="flex items-center gap-8">
             {[
@@ -251,10 +258,11 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               { icon: <Activity />, title: "Általános Diagnosztika", desc: "Teljes körű hardveres és szoftveres hiba feltárás speciális mérőeszközökkel." },
               { icon: <Cpu />, title: "Újrapasztázás", desc: "Prémium minőségű hővezető anyagok használata a hőmérséklet csökkentése érdekében." },
+              { icon: <Monitor />, title: "PC Építés", desc: "Egyedi igényekre szabott, profi PC összeszerelés prémium kábelrendezéssel." },
               { icon: <HardDrive />, title: "Bővítés & Tuning", desc: "Tárolóhely növelés, RAM bővítés és egyedi alkatrész installációk." }
             ].map((service, idx) => (
               <motion.div 
@@ -262,18 +270,128 @@ export default function App() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.2 }}
-                className="group p-10 bg-white/5 rounded-3xl border border-white/10 hover:border-brand-teal/30 transition-all duration-500 hover:-translate-y-2"
+                transition={{ delay: idx * 0.1 }}
+                className="group p-8 bg-white/5 rounded-3xl border border-white/10 hover:border-brand-teal/30 transition-all duration-500 hover:-translate-y-2 flex flex-col h-full"
               >
-                <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-8 text-brand-teal group-hover:bg-brand-teal group-hover:text-black transition-colors duration-500">
+                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-6 text-brand-teal group-hover:bg-brand-teal group-hover:text-black transition-colors duration-500">
                   {service.icon}
                 </div>
-                <h4 className="text-2xl font-bold text-white mb-4">{service.title}</h4>
-                <p className="text-slate-400 font-light leading-relaxed">{service.desc}</p>
+                <h4 className="text-xl font-bold text-white mb-3">{service.title}</h4>
+                <p className="text-slate-400 font-light leading-relaxed text-sm flex-grow">{service.desc}</p>
               </motion.div>
             ))}
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="flex justify-center mt-16"
+          >
+            <button 
+              onClick={() => setShowPrices(true)}
+              className="group relative px-12 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs rounded-full hover:bg-brand-teal transition-all duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.1)] flex items-center gap-3"
+            >
+              Áraink megtekintése
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </motion.div>
         </div>
+
+        {/* Price List Modal */}
+        <AnimatePresence>
+          {showPrices && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="bg-neutral-900 border border-white/10 w-full max-w-4xl rounded-[2.5rem] overflow-hidden shadow-2xl"
+              >
+                <div className="p-8 md:p-12 space-y-10">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <h3 className="text-3xl font-bold text-white tracking-tight italic">ÁRLISTA</h3>
+                      <p className="text-brand-teal text-xs font-bold tracking-[0.3em] uppercase">Klinikai Szolgáltatások</p>
+                    </div>
+                    <button 
+                      onClick={() => setShowPrices(false)}
+                      className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="text-slate-500 text-[10px] uppercase font-bold tracking-widest border-b border-white/5">
+                          <th className="pb-4 font-bold">Szolgáltatás</th>
+                          <th className="pb-4 font-bold">Tartalom</th>
+                          <th className="pb-4 font-bold text-right">Javasolt Ár</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {[
+                          { service: "Klinikai Tisztítás", content: "Portalanítás + Prémium újrapasztázás (PC/Laptop/Konzol)", price: "12.000 - 15.000 Ft" },
+                          { service: "Szoftveres Frissítés", content: "Op. rendszer telepítés + Driverek + Alapprogramok", price: "10.000 - 12.000 Ft" },
+                          { service: "Adatmentés", content: "Törölt adatok visszaállítása / Hibás meghajtóról mentés", price: "8.000 Ft-tól" },
+                          { service: "Hardveres Upgrade", content: "SSD/RAM beszerelés és beüzemelés", price: "6.000 Ft + alkatrész" },
+                          { service: "PC Építés", content: "Profi összeszerelés, kábelmenedzsment & OS telepítés", price: "15.000 - 35.000 Ft" }
+                        ].map((item, i) => (
+                          <tr key={i} className="group">
+                            <td className="py-6 text-white font-bold text-sm">{item.service}</td>
+                            <td className="py-6 text-slate-400 text-xs font-light">{item.content}</td>
+                            <td className="py-6 text-brand-cyan font-bold text-sm text-right whitespace-nowrap">{item.price}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10">
+                    <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
+                      <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-brand-teal" />
+                        Mosonmagyaróvár
+                      </h4>
+                      <p className="text-slate-400 text-xs font-light leading-relaxed">
+                        A városhatáron belül a PC/konzol felvétele és visszaszállítása <span className="text-brand-teal font-bold uppercase tracking-wider">teljesen díjmentes</span>, ezt a szolgáltatás alapára már tartalmazza.
+                      </p>
+                    </div>
+                    <div className="p-6 bg-white/5 rounded-2xl border border-white/5">
+                      <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-brand-cyan" />
+                        Környék & Falvak
+                      </h4>
+                      <p className="text-slate-400 text-xs font-light leading-relaxed">
+                        Levél, Hegyeshalom, Halászi és környéke: fix <span className="text-white font-bold">3.000 - 4.000 Ft</span> kiszállási díj. 
+                        <span className="block mt-2 text-brand-cyan font-medium italic">25.000 Ft feletti megrendelés esetén a környéken is ingyenes!</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-slate-500 text-[10px] uppercase tracking-widest">Az árak tájékoztató jellegűek és a specifikációktól függnek.</p>
+                    <a 
+                      href="#contact" 
+                      onClick={() => setShowPrices(false)}
+                      className="bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-xs uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]"
+                    >
+                      Kérek egy konkrét ajánlatot
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* Workshop Branding Section */}
@@ -282,11 +400,11 @@ export default function App() {
           <img 
             src={IMAGES.workshop} 
             alt="Home Workshop" 
-            className="w-full h-full object-cover opacity-40 grayscale-[0.5]"
+            className="w-full h-full object-cover opacity-60"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black" />
-          <div className="absolute inset-0 bg-brand-teal/5 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black" />
+          <div className="absolute inset-0 bg-brand-teal/10 mix-blend-overlay" />
         </div>
         
         <div className="relative z-10 text-center max-w-4xl px-6 space-y-12">
@@ -298,7 +416,7 @@ export default function App() {
           >
             <span className="text-brand-cyan font-bold tracking-[0.5em] uppercase text-xs">A Műhely</span>
             <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-tight">
-              SZALON MINŐSÉG <br /> <span className="text-brand-teal">OTTHONI KÖRNYEZETBEN</span>
+              KLINIKAI MINŐSÉG <br /> <span className="text-brand-teal">OTTHONI KÖRNYEZETBEN</span>
             </h2>
             <p className="text-slate-300 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto">
               Nem egy rideg nagyüzem, hanem egy dedikált, professzionális szervizstúdió, 
@@ -309,8 +427,8 @@ export default function App() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 border-t border-white/10">
             {[
-              { label: "Nyitvatartás", val: "09:00 - 18:00" },
-              { label: "Átfutási idő", val: "24-48 óra" },
+              { label: "Nyitvatartás", val: "Hétfő - Szombat: 08:00 - 18:00" },
+              { label: "Átfutási idő", val: "24-72 óra" },
               { label: "Garancia", val: "100% Bizalom" },
               { label: "Környezet", val: "Portalanított" }
             ].map((stat, i) => (
@@ -330,15 +448,20 @@ export default function App() {
             <div className="col-span-1 md:col-span-2 space-y-8">
               <img src={IMAGES.logo} alt="CR Logo" className="h-16 invert opacity-80" referrerPolicy="no-referrer" />
               <p className="text-slate-400 text-lg font-light leading-relaxed max-w-md">
-                A technológia bonyolult, mi egyszerűvé tesszük a kényelmet. 
-                Várunk szeretettel modern klinikánkon.
+                Önnek csak egy hívásába kerül: házhoz megyünk PC-jéért, laptopjáért vagy konzoljáért, 
+                majd a szerviz után tökéletes állapotban vissza is szállítjuk Önnek. 
+                Kényelem és szakértelem, közvetlenül az otthonába.
               </p>
               <div className="flex gap-4">
-                {['Instagram', 'Facebook', 'LinkedIn'].map(social => (
-                  <a key={social} href="#" className="px-5 py-2 border border-white/10 rounded-full text-xs font-bold text-white hover:bg-white hover:text-black transition-all">
-                    {social}
-                  </a>
-                ))}
+                <a 
+                  href="https://www.facebook.com/profile.php?id=61589728020534" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="px-5 py-2 border border-white/10 rounded-full text-xs font-bold text-white hover:bg-[#1877F2] hover:border-[#1877F2] transition-all flex items-center gap-2"
+                >
+                  <Facebook className="w-4 h-4" />
+                  Facebook
+                </a>
               </div>
             </div>
             
@@ -360,23 +483,23 @@ export default function App() {
             <div className="space-y-6">
               <h5 className="text-white font-bold tracking-widest text-sm uppercase">Elérhetőség</h5>
               <ul className="space-y-6 text-slate-400 text-sm font-light">
-                <li className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-teal">
-                    <MapPin className="w-4 h-4" />
+                <li className="flex items-start gap-4">
+                  <div className="w-8 flex-shrink-0 flex justify-center text-brand-teal pt-1">
+                    <MapPin className="w-5 h-5" />
                   </div>
-                  <span>1051 Budapest, Szent István tér</span>
+                  <span className="leading-relaxed">Mosonmagyaróvár és környéke</span>
                 </li>
-                <li className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-teal">
-                    <Phone className="w-4 h-4" />
+                <li className="flex items-start gap-4">
+                  <div className="w-8 flex-shrink-0 flex justify-center text-brand-teal pt-1">
+                    <Phone className="w-5 h-5" />
                   </div>
-                  <span>+36 20 123 4567</span>
+                  <a href="tel:+36303413836" className="hover:text-brand-teal transition-colors leading-relaxed">+36 30 341 3836</a>
                 </li>
-                <li className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-brand-teal">
-                    <Mail className="w-4 h-4" />
+                <li className="flex items-start gap-4">
+                  <div className="w-8 flex-shrink-0 flex justify-center text-brand-teal pt-1">
+                    <Mail className="w-5 h-5" />
                   </div>
-                  <span>szerviz@crhardver.hu</span>
+                  <a href="mailto:cimpianrobert@crhardverklinika.com" className="hover:text-brand-teal transition-colors leading-relaxed break-all">cimpianrobert@crhardverklinika.com</a>
                 </li>
               </ul>
             </div>
