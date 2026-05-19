@@ -72,14 +72,3 @@ export const submitMessage = async (name: string, email: string, content: string
     handleFirestoreError(error, OperationType.WRITE, path);
   }
 };
-
-export const getCustomerDevices = async (customerId: string) => {
-  const path = 'devices';
-  try {
-    const q = query(collection(db, path), where('customerId', '==', customerId));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    handleFirestoreError(error, OperationType.LIST, path);
-  }
-};

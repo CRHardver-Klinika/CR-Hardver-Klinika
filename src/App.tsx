@@ -5,13 +5,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
-import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu, LogOut, Settings, Users, Box, MessageSquare } from "lucide-react";
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
-import { auth, loginWithGoogle, logout } from "./lib/firebase";
+import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu } from "lucide-react";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import { submitMessage } from "./lib/firestore";
-import { onAuthStateChanged, User } from "firebase/auth";
-
-import Dashboard from "./components/admin/Dashboard";
 
 const IMAGES = {
   hero: "/hero.png",
@@ -72,7 +68,7 @@ function ContactForm() {
               <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:border-brand-cyan/30 transition-all">
                 <Mail className="w-6 h-6 text-brand-cyan mb-4 group-hover:scale-110 transition-transform" />
                 <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Írjon e-mailt</p>
-                <a href="mailto:info@crhardverklinika.com" className="text-white font-bold hover:text-brand-cyan transition-colors text-xs break-all">info@crhardverklinika.com</a>
+                <a href="mailto:cimpianrobert@crhardverklinika.com" className="text-white font-bold hover:text-brand-cyan transition-colors text-xs break-all">cimpianrobert@crhardverklinika.com</a>
               </div>
             </div>
           </div>
@@ -246,7 +242,6 @@ function Portfolio() {
 }
 
 function LandingPage() {
-  const navigate = useNavigate();
   const [showPrices, setShowPrices] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -278,30 +273,6 @@ function LandingPage() {
   // Section 4: Devices (0.85 to 1)
   const devicesScale = useTransform(smoothProgress, [0.8, 0.95, 1], [1.2, 1, 1]);
   const devicesOpacity = useTransform(smoothProgress, [0.85, 0.95], [0, 1]);
-
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loginLoading, setLoginLoading] = useState(false);
-
-  const handleLogin = async () => {
-    setLoginLoading(true);
-    try {
-      const user = await loginWithGoogle();
-      if (user?.email === "Cimpian.Robert.88@gmail.com") {
-        navigate('/admin');
-      }
-    } catch (error: any) {
-      alert(error.message);
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsAdmin(user?.email === "Cimpian.Robert.88@gmail.com");
-    });
-    return () => unsubscribe();
-  }, []);
 
   return (
     <div className="relative bg-black" id="top">
@@ -350,16 +321,6 @@ function LandingPage() {
                 Kérjen ajánlatot
               </a>
             </li>
-            {isAdmin && (
-              <li>
-                <Link 
-                  to="/admin" 
-                  className="bg-brand-teal text-black px-6 py-3 rounded-full font-bold text-xs tracking-widest uppercase hover:bg-black hover:text-white transition-all shadow-xl shadow-brand-teal/20"
-                >
-                  Admin
-                </Link>
-              </li>
-            )}
           </ul>
 
           {/* Mobile Toggle */}
@@ -848,7 +809,6 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/admin" element={<Dashboard />} />
       </Routes>
     </Router>
   );
