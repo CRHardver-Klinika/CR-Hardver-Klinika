@@ -146,6 +146,105 @@ function ContactForm() {
   );
 }
 
+function Portfolio() {
+  const [activeFilter, setActiveFilter] = useState('Összes');
+  
+  const items = [
+    { src: "/p1.jpg", title: "Custom Build: Brutális Gamer Teljesítmény", category: "PC Építés" },
+    { src: "/p2.jpg", title: "Premium GPU Karbantartás", category: "Karbantartás" },
+    { src: "/p3.jpg", title: "White Ghost Gamer Build", category: "PC Építés" },
+    { src: "/p4.jpg", title: "ASUS ROG Strix Build processzor újrapasztázás", category: "Szerviz" },
+    { src: "/p5.jpg", title: "ASUS Strix alaplap Optimalizálás", category: "Szerviz" },
+    { src: "/p6.jpg", title: "Futurisztikus Toronyépítés", category: "PC Építés" },
+    { src: "/p7.jpg", title: "High-End Memória Tuning", category: "Premium" },
+    { src: "/p8.jpg", title: "TUF Gaming Hardveres Tisztítás", category: "Karbantartás" },
+    { src: "/p9.jpg", title: "Vízhűtéses Rendszer-ellenőrzés", category: "Karbantartás" },
+  ];
+
+  const filteredItems = activeFilter === 'Összes' 
+    ? items 
+    : items.filter(item => item.category === activeFilter);
+
+  const filters = ['Összes', 'PC Építés', 'Szerviz', 'Karbantartás', 'Konzol'];
+
+  return (
+    <section id="portfolio" className="py-32 bg-[#050505] px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
+          <div className="space-y-4">
+            <span className="text-brand-teal font-bold tracking-[0.4em] uppercase text-xs">Dolgoztunk rajta</span>
+            <h2 className="text-4xl md:text-7xl font-bold text-white tracking-tighter uppercase">Portfólió</h2>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            {filters.map(filter => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+                  activeFilter === filter 
+                    ? 'bg-brand-teal text-black shadow-[0_0_20px_rgba(8,247,254,0.3)]' 
+                    : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                }`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+          <AnimatePresence mode="popLayout">
+            {filteredItems.map((item, idx) => (
+              <motion.div 
+                layout
+                key={item.title}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.4 }}
+                className="group relative aspect-[4/5] overflow-hidden rounded-2xl md:rounded-[2.5rem] bg-neutral-900 border border-white/5"
+              >
+                <img 
+                  src={item.src} 
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-10 translate-y-2 group-hover:translate-y-0 transition-all duration-500">
+                  <span className="text-brand-cyan text-[8px] md:text-[10px] font-bold uppercase tracking-[0.3em] mb-1 md:mb-2 block">{item.category}</span>
+                  <h4 className="text-xs md:text-2xl font-bold text-white tracking-tight leading-tight line-clamp-2">{item.title}</h4>
+                  <div className="w-12 h-1 bg-brand-teal mt-4 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 hidden md:block" />
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        <div className="mt-20 p-12 bg-white/5 rounded-[3rem] border border-white/5 text-center relative overflow-hidden group">
+          <div className="absolute inset-0 bg-brand-teal/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="relative z-10 space-y-6">
+            <h3 className="text-2xl md:text-3xl font-bold text-white uppercase italic">Szeretné itt látni saját gépét?</h3>
+            <p className="text-slate-400 max-w-xl mx-auto font-light leading-relaxed">
+              Minden nálunk járt eszközről kérésre profi fotókat készítünk, hogy Ön is büszke lehessen megújult vagy újonnan épített hardverére.
+            </p>
+            <div className="pt-4">
+              <a 
+                href="#contact"
+                className="inline-flex items-center gap-3 bg-white text-black font-black px-10 py-5 rounded-2xl uppercase tracking-widest hover:bg-brand-teal transition-all shadow-2xl"
+              >
+                Kezdjük el a közös munkát
+                <ChevronRight className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function LandingPage() {
   const navigate = useNavigate();
   const [showPrices, setShowPrices] = useState(false);
@@ -376,7 +475,7 @@ function LandingPage() {
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
             
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-full max-w-4xl px-8 flex justify-between items-end">
+            <div className="absolute bottom-12 md:bottom-24 left-1/2 -translate-x-1/2 w-full max-w-4xl px-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-brand-teal">
                   <Cpu className="w-5 h-5" />
@@ -384,7 +483,7 @@ function LandingPage() {
                 </div>
                 <h3 className="text-4xl md:text-6xl font-bold text-white tracking-tight">PRECÍZIÓS <br /> HŰTÉS</h3>
               </div>
-              <p className="text-slate-400 max-w-xs text-sm leading-relaxed hidden md:block">
+              <p className="text-slate-400 max-w-xs text-sm leading-relaxed">
                 A maximális teljesítmény alapja az optimális hőelvezetés. Minden szervizelésnél kiemelt figyelmet fordítunk a CPU hűtési hatékonyságára.
               </p>
             </div>
@@ -404,14 +503,18 @@ function LandingPage() {
             <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
 
-            <div className="absolute top-48 left-12 space-y-6">
+            <div className="absolute top-32 md:top-48 left-6 md:left-12 right-6 md:right-auto space-y-6">
               <div className="flex items-center gap-2 text-brand-cyan">
                 <Zap className="w-6 h-6 fill-brand-cyan" />
                 <span className="text-xs font-bold tracking-[0.3em] uppercase">Graphics Performance</span>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-5xl md:text-7xl font-bold text-white tracking-tighter">ULTRA <br /> GRAFIKA</h3>
-                <p className="text-slate-400 text-sm font-medium tracking-widest">STABILITÁS TESZTELVE</p>
+              <div className="space-y-4">
+                <h3 className="text-4xl md:text-6xl font-bold text-white tracking-tighter uppercase leading-[0.9]">
+                  GYÁRI TELJESÍTMÉNY, <br /> CHIP-RE RECEPTRE!
+                </h3>
+                <p className="text-slate-300 text-sm md:text-base font-light leading-relaxed max-w-xl">
+                  A kiszáradt hővezető paszta és az elöregedett padek akár 15-20°C-os melegedést, ezáltal drasztikus teljesítménycsökkenést és végzetes hardverhibát okozhatnak. Ne várd meg, amíg a méregdrága videókártyád feladja a harcot! Időszakos prémium karbantartásunkkal visszaadjuk a hardvered gyári hűtési hatékonyságát és maximális FPS számait.
+                </p>
               </div>
               <div className="flex gap-4">
                 {[1, 2, 3].map((i) => (
@@ -441,15 +544,18 @@ function LandingPage() {
             />
             <div className="absolute inset-0 cinematic-vignette pointer-events-none opacity-40" />
             
-            <div className="absolute bottom-24 right-12 text-right">
-              <h3 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-4">KLINIKAI <br /> SZINTŰ ELLÁTÁS</h3>
-              <p className="text-slate-300 text-base max-w-md ml-auto font-light leading-relaxed mb-8">
-                Legyen szó játékkonzolról, professzionális munkaállomásról vagy laptopról, mi gondoskodunk eszközeid egészségéről.
+            <div className="absolute bottom-12 md:bottom-24 left-6 right-6 md:right-12 md:left-auto text-left md:text-right">
+              <h3 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-4 text-left md:text-right">KLINIKAI <br /> SZINTŰ ELLÁTÁS</h3>
+              <p className="text-slate-300 text-sm md:text-base max-w-md md:ml-auto font-light leading-relaxed mb-8">
+                Legyen szó játékkonzolról, professzionális munkaállomásról, gamer pc-ről vagy laptopról, mi gondoskodunk eszközeid egészségéről.
               </p>
-              <div className="flex justify-end gap-3">
-                <button className="bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-sm uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]">
+              <div className="flex justify-start md:justify-end gap-3">
+                <a 
+                  href="#contact"
+                  className="bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-sm uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]"
+                >
                   Érdekel a javítás
-                </button>
+                </a>
               </div>
             </div>
           </motion.div>
@@ -611,6 +717,8 @@ function LandingPage() {
           )}
         </AnimatePresence>
       </section>
+
+      <Portfolio />
 
       {/* Workshop Branding Section */}
       <section id="workshop" className="relative py-48 bg-black overflow-hidden flex items-center justify-center">
