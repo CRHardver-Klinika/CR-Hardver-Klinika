@@ -64,8 +64,18 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    match /service/{serviceId} {
+      allow create: if incoming().workName == 'Web Ajánlatkérés'
+        && incoming().device == 'Weboldal megkeresés'
+        && incoming().status == 'Folyamatban';
+      allow read, update, delete: if isAdmin();
+    }
+
     match /services/{serviceId} {
-      allow read, write: if isAdmin();
+      allow create: if incoming().workName == 'Web Ajánlatkérés'
+        && incoming().device == 'Weboldal megkeresés'
+        && incoming().status == 'Folyamatban';
+      allow read, update, delete: if isAdmin();
     }
 
     match /inventory/{itemId} {

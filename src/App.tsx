@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
-import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu } from "lucide-react";
+import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu, Shield } from "lucide-react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import { submitMessage } from "./lib/firestore";
 
@@ -26,20 +26,34 @@ const IMAGES = {
      Nevezd át őket, hogy csak egyszer szerepeljen bennük a .png (pl. 'hero.png')!
 */
 
-function ContactForm() {
+interface ContactFormProps {
+  onShowPrivacy: () => void;
+}
+
+function ContactForm({ onShowPrivacy }: ContactFormProps) {
   const [formData, setFormData] = useState({ name: '', email: '', content: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedPrivacy) {
+      setErrorMessage("Az adatkezelési tájékoztató elfogadása kötelező.");
+      setStatus('error');
+      return;
+    }
     setStatus('sending');
+    setErrorMessage('');
     try {
       await submitMessage(formData.name, formData.email, formData.content);
       setStatus('success');
       setFormData({ name: '', email: '', content: '' });
+      setAcceptedPrivacy(false);
       setTimeout(() => setStatus('idle'), 5000);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setErrorMessage(error?.message || "Hiba történt a küldés során. Kérjük próbáld újra később.");
       setStatus('error');
     }
   };
@@ -111,6 +125,20 @@ function ContactForm() {
                 />
               </div>
               
+              <div className="flex items-start gap-3 mt-4">
+                <input 
+                  required
+                  id="privacy-consent"
+                  type="checkbox"
+                  checked={acceptedPrivacy}
+                  onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                  className="mt-1 accent-brand-teal h-4 w-4 bg-white/5 border border-white/10 rounded cursor-pointer focus:ring-1 focus:ring-brand-teal focus:ring-offset-neutral-900"
+                />
+                <label htmlFor="privacy-consent" className="text-slate-400 text-xs font-light leading-normal cursor-pointer select-none">
+                  Elolvastam és elfogadom az <button type="button" onClick={onShowPrivacy} className="text-brand-teal font-bold hover:underline hover:text-brand-cyan transition-colors">Adatkezelési Tájékoztatót</button>, hozzájárulok megadott adataim kezeléséhez.
+                </label>
+              </div>
+
               <button 
                 type="submit"
                 disabled={status === 'sending'}
@@ -130,9 +158,14 @@ function ContactForm() {
                 </motion.p>
               )}
               {status === 'error' && (
-                <p className="text-red-500 text-center font-bold text-xs uppercase tracking-widest">
-                  Hiba történt. Kérjük próbáld újra később.
-                </p>
+                <div className="text-red-500 text-center space-y-2 bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
+                  <p className="font-bold text-xs uppercase tracking-widest">
+                    Küldési hiba
+                  </p>
+                  <p className="text-xs text-slate-300 font-light normal-case">
+                    {errorMessage}
+                  </p>
+                </div>
               )}
             </form>
           </div>
@@ -243,8 +276,27 @@ function Portfolio() {
 
 function LandingPage() {
   const [showPrices, setShowPrices] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showCookiePolicy, setShowCookiePolicy] = useState(false);
+  const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const accepted = localStorage.getItem("cookie-consent-accepted");
+    if (!accepted) {
+      const timer = setTimeout(() => {
+        setShowCookieConsent(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleAcceptCookies = () => {
+    localStorage.setItem("cookie-consent-accepted", "true");
+    setShowCookieConsent(false);
+  };
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -581,102 +633,6 @@ function LandingPage() {
             </button>
           </motion.div>
         </div>
-
-        {/* Price List Modal */}
-        <AnimatePresence>
-          {showPrices && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowPrices(false)}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/95 backdrop-blur-sm cursor-pointer"
-            >
-              <motion.div 
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-neutral-900 border border-white/10 w-full max-w-4xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl cursor-default max-h-[90vh] overflow-y-auto"
-              >
-                <div className="p-6 md:p-12 space-y-8 md:space-y-10">
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-1">
-                      <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight italic uppercase">Árlista</h3>
-                      <p className="text-brand-teal text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase">Klinikai Szolgáltatások</p>
-                    </div>
-                    <button 
-                      onClick={() => setShowPrices(false)}
-                      className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
-                    >
-                      <X className="w-5 h-5 md:w-6 md:h-6" />
-                    </button>
-                  </div>
-
-                  <div className="overflow-x-auto -mx-2">
-                    <table className="w-full text-left min-w-[500px] md:min-w-0">
-                      <thead>
-                        <tr className="text-slate-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-white/5">
-                          <th className="pb-4 font-bold">Szolgáltatás</th>
-                          <th className="pb-4 font-bold">Tartalom</th>
-                          <th className="pb-4 font-bold text-right">Javasolt Ár</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5">
-                        {[
-                          { service: "Klinikai Tisztítás", content: "Portalanítás + Prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
-                          { service: "Szoftveres Frissítés", content: "Op. rendszer telepítés + Driverek", price: "10.000 - 12.000 Ft" },
-                          { service: "Adatmentés", content: "Törölt adatok visszaállítása / Mentés", price: "8.000 Ft-tól" },
-                          { service: "Hardveres Upgrade", content: "SSD/RAM beszerelés és beüzemelés", price: "6.000 Ft + alkatrész" },
-                          { service: "PC Építés", content: "Profi összeszerelés & OS telepítés", price: "15.000 - 35.000 Ft" }
-                        ].map((item, i) => (
-                          <tr key={i} className="group">
-                            <td className="py-4 md:py-6 text-white font-bold text-xs md:text-sm">{item.service}</td>
-                            <td className="py-4 md:py-6 text-slate-400 text-[10px] md:text-xs font-light">{item.content}</td>
-                            <td className="py-4 md:py-6 text-brand-cyan font-bold text-xs md:text-sm text-right whitespace-nowrap">{item.price}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-10">
-                    <div className="p-4 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                      <h4 className="text-white font-bold text-xs md:text-sm mb-2 md:mb-3 flex items-center gap-2">
-                        <MapPin className="w-3 h-3 md:w-4 md:h-4 text-brand-teal" />
-                        Mosonmagyaróvár
-                      </h4>
-                      <p className="text-slate-400 text-[10px] md:text-xs font-light leading-relaxed">
-                        A városhatáron belül a szállítás <span className="text-brand-teal font-bold uppercase tracking-wider">díjmentes</span>, az alapár tartalmazza.
-                      </p>
-                    </div>
-                    <div className="p-4 md:p-6 bg-white/5 rounded-2xl border border-white/5">
-                      <h4 className="text-white font-bold text-xs md:text-sm mb-2 md:mb-3 flex items-center gap-2">
-                        <Zap className="w-3 h-3 md:w-4 md:h-4 text-brand-cyan" />
-                        Környék & Falvak
-                      </h4>
-                      <p className="text-slate-400 text-[10px] md:text-xs font-light leading-relaxed">
-                        Fix <span className="text-white font-bold">3-4e Ft</span> kiszállás. 
-                        <span className="block mt-1 text-brand-cyan font-medium italic">25.000 Ft felett ingyenes!</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-                    <p className="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest">Az árak tájékoztató jellegűek.</p>
-                    <a 
-                      href="#contact" 
-                      onClick={() => setShowPrices(false)}
-                      className="w-full md:w-auto bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-[10px] md:text-xs uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]"
-                    >
-                      Kérek egy konkrét ajánlatot
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </section>
 
       <Portfolio />
@@ -728,7 +684,7 @@ function LandingPage() {
         </div>
       </section>
 
-      <ContactForm />
+      <ContactForm onShowPrivacy={() => setShowPrivacy(true)} />
 
       {/* Footer / Contact */}
       <footer id="footer" className="bg-[#050505] pt-32 pb-12 px-6 border-t border-white/5">
@@ -766,6 +722,22 @@ function LandingPage() {
                 ].map(link => (
                   <li key={link.id}><a href={`#${link.id}`} className="hover:text-brand-teal transition-colors">{link.label}</a></li>
                 ))}
+                <li>
+                  <button 
+                    onClick={() => setShowPrivacy(true)} 
+                    className="hover:text-brand-teal transition-colors text-left cursor-pointer font-light block"
+                  >
+                    Adatkezelési Tájékoztató
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => setShowCookiePolicy(true)} 
+                    className="hover:text-brand-teal transition-colors text-left cursor-pointer font-light block"
+                  >
+                    Süti (Cookie) Tájékoztató
+                  </button>
+                </li>
               </ul>
             </div>
 
@@ -795,11 +767,404 @@ function LandingPage() {
           </div>
           
           <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase font-bold tracking-[0.2em] text-slate-600">
-            <p>&copy; 2024 CR HARDVER KLINIKA. MINDEN JOG FENNTARTVA.</p>
+            <p>&copy; 2026 CR HARDVER KLINIKA. MINDEN JOG FENNTARTVA.</p>
             <p>MAXIMÁLIS TELJESÍTMÉNYRE TERVEZVE</p>
           </div>
         </div>
       </footer>
+
+      {/* Price List Modal */}
+      <AnimatePresence>
+        {showPrices && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPrices(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/95 backdrop-blur-sm cursor-pointer"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-neutral-900 border border-white/10 w-full max-w-4xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl cursor-default max-h-[85vh] md:max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 md:p-12 space-y-8 md:space-y-10">
+                <div className="flex justify-between items-start flex-wrap gap-4">
+                  <div className="space-y-1 max-w-[calc(100%-3.5rem)]">
+                    <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight italic uppercase">Árlista</h3>
+                    <p className="text-brand-teal text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase mb-1">Klinikai Szolgáltatások</p>
+                    <p className="text-slate-400 text-[10px] leading-tight font-medium">
+                      Ha vissza szeretne lépni, kattintson az árlista ablak melletti sötét területre, vagy használja a bezárás gombot.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setShowPrices(false)}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5 md:w-6 md:h-6" />
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto -mx-2">
+                  <table className="w-full text-left min-w-[500px] md:min-w-0">
+                    <thead>
+                      <tr className="text-slate-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-white/5">
+                        <th className="pb-4 font-bold">Szolgáltatás</th>
+                        <th className="pb-4 font-bold">Tartalom</th>
+                        <th className="pb-4 font-bold text-right">Javasolt Ár</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {[
+                        { service: "Klinikai Tisztítás", content: "Portalanítás + Prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
+                        { service: "Szoftveres Frissítés", content: "Op. rendszer telepítés + Driverek", price: "10.000 - 12.000 Ft" },
+                        { service: "Adatmentés", content: "Törölt adatok visszaállítása / Mentés", price: "8.000 Ft-tól" },
+                        { service: "Hardveres Upgrade", content: "SSD/RAM beszerelés és beüzemelés", price: "6.000 Ft + alkatrész" },
+                        { service: "PC Építés", content: "Profi összeszerelés & OS telepítés", price: "15.000 - 35.000 Ft" }
+                      ].map((item, i) => (
+                        <tr key={i} className="group">
+                          <td className="py-4 md:py-6 text-white font-bold text-xs md:text-sm">{item.service}</td>
+                          <td className="py-4 md:py-6 text-slate-400 text-[10px] md:text-xs font-light">{item.content}</td>
+                          <td className="py-4 md:py-6 text-brand-cyan font-bold text-xs md:text-sm text-right whitespace-nowrap">{item.price}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-10">
+                  <div className="p-4 md:p-6 bg-white/5 rounded-2xl border border-white/5">
+                    <h4 className="text-white font-bold text-xs md:text-sm mb-2 md:mb-3 flex items-center gap-2">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4 text-brand-teal" />
+                      Mosonmagyaróvár
+                    </h4>
+                    <p className="text-slate-400 text-[10px] md:text-xs font-light leading-relaxed">
+                      A városhatáron belül a szállítás <span className="text-brand-teal font-bold uppercase tracking-wider">díjmentes</span>, az alapár tartalmazza.
+                    </p>
+                  </div>
+                  <div className="p-4 md:p-6 bg-white/5 rounded-2xl border border-white/5">
+                    <h4 className="text-white font-bold text-xs md:text-sm mb-2 md:mb-3 flex items-center gap-2">
+                      <Zap className="w-3 h-3 md:w-4 md:h-4 text-brand-cyan" />
+                      Környék & Falvak
+                    </h4>
+                    <p className="text-slate-400 text-[10px] md:text-xs font-light leading-relaxed">
+                      Fix <span className="text-white font-bold">3-4e Ft</span> kiszállás. 
+                      <span className="block mt-1 text-brand-cyan font-medium italic">25.000 Ft felett ingyenes!</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                  <div className="space-y-1 text-center md:text-left">
+                    <p className="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest">Az árak tájékoztató jellegűek.</p>
+                    <p className="text-slate-400 text-[9px] md:text-[10px]">
+                      Ha vissza szeretne lépni, kattintson az árlista ablak melletti sötét területre.
+                    </p>
+                  </div>
+                  <a 
+                    href="#contact" 
+                    onClick={() => setShowPrices(false)}
+                    className="w-full md:w-auto bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-[10px] md:text-xs uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]"
+                  >
+                    Kérek egy konkrét ajánlatot
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Privacy Policy Modal */}
+      <AnimatePresence>
+        {showPrivacy && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPrivacy(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/95 backdrop-blur-sm cursor-pointer"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-neutral-900 border border-white/10 w-full max-w-4xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl cursor-default max-h-[85vh] md:max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 md:p-12 space-y-8 md:space-y-10">
+                <div className="flex justify-between items-start flex-wrap gap-4">
+                  <div className="space-y-1 max-w-[calc(100%-3.5rem)]">
+                    <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight uppercase">Adatkezelési Tájékoztató</h3>
+                    <p className="text-brand-teal text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">CR Hardver Klinika — GDPR Megfelelés</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowPrivacy(false)}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5 md:w-6 md:h-6" />
+                  </button>
+                </div>
+
+                <div className="text-slate-300 text-xs md:text-sm font-light space-y-6 md:space-y-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-2 md:pr-4 custom-scrollbar">
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">1. Bevezetés és az Adatkezelő adatai</h4>
+                    <p>
+                      A <strong>CR Hardver Klinika</strong> (Adatkezelő: Cimpian Robert egyéni vállalkozó, a továbbiakban: "Szolgáltató" vagy "Adatkezelő") elkötelezett a felhasználók és ügyfelek személyes adatainak védelme iránt. Jelen Adatkezelési Tájékoztató célja, hogy teljes körű és átlátható tájékoztatást nyújtson a weboldal látogatói által a kapcsolatfelvételi űrlapon megadott személyes adatok kezelésének módjáról, jogalapjáról, céljáról és az érintettek jogorvoslati jogairól, az Európai Unió Általános Adatvédelmi Rendeletével (GDPR - General Data Protection Regulation, 2016/679/EU rendelet) és a hazai jogszabályokkal (Infotörvény - 2011. évi CXII. törvény) összhangban.
+                    </p>
+                    <div className="bg-white/5 p-4 rounded-xl space-y-1 mt-2 border border-white/5 text-[11px] md:text-xs text-slate-400">
+                      <p><strong>Adatkezelő megnevezése:</strong> Cimpian Robert e.v. (CR Hardver Klinika)</p>
+                      <p><strong>Kapcsolattartó / Adatvédelmi felelős:</strong> Cimpian Robert</p>
+                      <p><strong>E-mail cím:</strong> cimpianrobert@crhardverklinika.com</p>
+                      <p><strong>Telefonszám:</strong> +36 30 341 3836</p>
+                      <p><strong>Weboldal címe:</strong> https://crhardverklinika.com</p>
+                    </div>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">2. A kezelt személyes adatok köre, célja és jogalapja</h4>
+                    <p>
+                      Amikor Ön a weboldalunkon található kapcsolatfelvételi vagy árajánlatkérő űrlapot használja, a következő személyes adatokat gyűjtjük és kezeljük:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 text-slate-400">
+                      <li><strong>Név (Teljes név):</strong> Szükséges a kapcsolatfelvételhez, az Ön megszólításához és a személyes kommunikációhoz.</li>
+                      <li><strong>E-mail cím:</strong> Elengedhetetlen az Önnek küldött válaszok, árajánlatok eljuttatásához és az írásos egyeztetésekhez.</li>
+                      <li><strong>Hiba leírása / Üzenet tartalma:</strong> Az Ön által önkéntesen megadott szöveg, amely segít az eszköz hibájának beazonosításában és a pontos szerviz ajánlat kidolgozásában.</li>
+                    </ul>
+                    <p className="mt-2">
+                      <strong>Az adatkezelési célja:</strong> Az Ön által küldött kérdések, ajánlatkérések feldolgozása, megválaszolása, a szervizelés és javítási munkálatok logisztikai egyeztetése.
+                    </p>
+                    <p>
+                      <strong>Az adatkezelés jogalapja:</strong> Az Ön kifejezett és önkéntes hozzájárulása (GDPR 6. cikk (1) bekezdés a) pont), amelyet az űrlap elküldése előtt található jelölőnégyzet bepipálásával ad meg. Jelölőnégyzet hiányában vagy amennyiben azt nem fogadja el, az űrlap nem küldhető el.
+                    </p>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">3. Az adatok tárolásának időtartama</h4>
+                    <p>
+                      Az Adatkezelő a megadott személyes adatokat kizárólag a cél eléréséhez legszükségesebb ideig kezeli:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 text-slate-400">
+                      <li>Amennyiben a kapcsolatfelvételt követő <strong>6 hónapon belül nem jön létre szervizelési szerződés vagy megbízás</strong>, az Ön adatait (és az üzeneteket) véglegesen töröljük a levelező- és adatbázis rendszerünkből.</li>
+                      <li>Amennyiben a kapcsolatfelvételből <strong>sikeres megrendelés vagy szolgáltatási szerződés jön létre</strong>, a számlázási név és kapcsolattartási adatok tárolására a Számviteli Törvény (2000. évi C. törvény 169. §) kötelező előírásai vonatkoznak, mely értelmében a számlázási adatokat legalább 8 évig meg kell őriznünk.</li>
+                    </ul>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">4. Adatbiztonság és Adatfeldolgozók</h4>
+                    <p>
+                      Az adatok védelme érdekében az Adatkezelő minden tőle elvárható technikai és szervezési intézkedést megtesz. Az űrlapi adatok átvitele HTTPS protokollon keresztül, SSL titkosítással történik. Az adatokat a Google Firebase Firestore felhőalapú adatbázisában tároljuk biztonságos módon, amely megfelel a legmagasabb szintű iparági adatbiztonsági követelményeknek.
+                    </p>
+                    <p>
+                      Személyes adatait harmadik félnek, reklámcélú megkeresésekre semmilyen körülmények között <strong>nem adjuk át, nem értékesítjük és nem tesszük hozzáférhetővé</strong>. Az adatokhoz kizárólag a Szolgáltató ügyvezetője férhet hozzá szigorú hozzáférés-ellenőrzés mellett.
+                    </p>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">5. Az Ön adatvédelmi jogai (Érintetti jogok)</h4>
+                    <p>
+                      A GDPR értelmében Ön az adatkezelés teljes időtartama alatt az alábbi jogokkal rendelkezik, melyeket ingyenesen érvényesíthet a <a href="mailto:cimpianrobert@crhardverklinika.com" className="text-brand-teal hover:underline">cimpianrobert@crhardverklinika.com</a> e-mail címen:
+                    </p>
+                    <ul className="list-decimal pl-5 space-y-2 text-slate-400">
+                      <li><strong>Tájékoztatáshoz és hozzáféréshez való jog:</strong> Ön kérhet részletes felvilágosítást arról, hogy kezelünk-e Önnel kapcsolatos személyes adatot, és ha igen, pontosan mely adatokat tároljuk.</li>
+                      <li><strong>Helyesbítéshez való jog:</strong> Kérheti a pontatlanul rögzített vagy megváltozott személyes adatainak módosítását.</li>
+                      <li><strong>Törléshez való jog ("elfeledtetés"):</strong> Kérésére azonnal töröljük adatait a rendszerünkből, amennyiben azt más jogszabályi kötelezettség (pl. számviteli bizonylat megőrzése) nem gátolja meg.</li>
+                      <li><strong>Az adatkezelés korlátozásához való jog:</strong> Kérheti adatainak zárolását (az adatkezelés korlátozását), ha vitatja az adatok pontosságát vagy a kezelés jogszerűségét.</li>
+                      <li><strong>Adathordozhatósághoz való jog:</strong> Kérheti, hogy személyes adatait széles körben használt, géppel olvasható formátumban adjuk át Önnek, vagy továbbítsuk egy másik adatkezelőnek.</li>
+                      <li><strong>Tiltakozáshoz való jog:</strong> Ön bármikor tiltakozhat személyes adatainak kezelése ellen.</li>
+                    </ul>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">6. Jogorvoslat és Hatósági Bejelentés</h4>
+                    <p>
+                      Mindent megteszünk annak érdekében, hogy az adatkezelés a legnagyobb biztonságban és jogszerűen történjen. Amennyiben bármilyen észrevétele, aggálya vagy panasza van, kérjük, első lépésben lépjen kapcsolatba velünk a fenti e-mail címen vagy a <strong>+36 30 341 3836</strong>-os telefonszámon, hogy azonnal megvizsgálhassuk és orvosolhassuk az ügyet.
+                    </p>
+                    <p>
+                      Önnek jogában áll panasszal élni az adatvédelmi felügyeleti hatóságnál is, vagy bírósághoz fordulhat:
+                    </p>
+                    <div className="bg-white/5 p-4 rounded-xl space-y-1 mt-2 border border-white/5 text-[11px] md:text-xs text-slate-400">
+                      <p><strong>Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH)</strong></p>
+                      <p><strong>Székhely:</strong> 1055 Budapest, Falk Miksa utca 9-11.</p>
+                      <p><strong>Postacím:</strong> 1363 Budapest, Pf. 9.</p>
+                      <p><strong>E-mail:</strong> ugyfelszolgalat@naih.hu</p>
+                      <p><strong>Weboldal:</strong> <a href="https://www.naih.hu" target="_blank" rel="noopener noreferrer" className="text-brand-teal hover:underline">https://www.naih.hu</a></p>
+                    </div>
+                  </section>
+                </div>
+
+                <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                  <p className="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest leading-relaxed">
+                    Utolsó frissítés: 2026. május 24.
+                  </p>
+                  <button 
+                    onClick={() => setShowPrivacy(false)}
+                    className="w-full md:w-auto bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-[10px] md:text-xs uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]"
+                  >
+                    Megértettem és bezárom
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cookie Policy Modal */}
+      <AnimatePresence>
+        {showCookiePolicy && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowCookiePolicy(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/95 backdrop-blur-sm cursor-pointer"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-neutral-900 border border-white/10 w-full max-w-4xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl cursor-default max-h-[85vh] md:max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 md:p-12 space-y-8 md:space-y-10">
+                <div className="flex justify-between items-start flex-wrap gap-4">
+                  <div className="space-y-1 max-w-[calc(100%-3.5rem)]">
+                    <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight uppercase">Süti (Cookie) Tájékoztató</h3>
+                    <p className="text-brand-teal text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">CR Hardver Klinika — Az Ön adatainak és élményének védelme</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowCookiePolicy(false)}
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5 md:w-6 md:h-6" />
+                  </button>
+                </div>
+
+                <div className="text-slate-300 text-xs md:text-sm font-light space-y-6 md:space-y-8 leading-relaxed max-h-[50vh] overflow-y-auto pr-2 md:pr-4 custom-scrollbar">
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">1. Mik azok a sütik (Cookie-k)?</h4>
+                    <p>
+                      A süti (cookie) egy kis formátumú adatcsomag, amelyet a webszerver küld a látogató böngészőjének, és amelyet a látogató eszköze (számítógép, telefon, tablet) eltárol. A sütik segítenek abban, hogy a weboldal megjegyezze a látogatásával kapcsolatos beállításokat (például a süti tájékoztató elfogadásának tényét), növeljék az oldal használati élményét és biztonságát. A sütik nem tartalmaznak futtatható kódokat, nem hordoznak vírusokat és nem adnak hozzáférést a számítógépe merevlemezéhez.
+                    </p>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">2. Milyen sütiket használ ez a weboldal?</h4>
+                    <p>
+                      A CR Hardver Klinika honlapja kizárólag a legszükségesebb, úgynevezett <strong>technikai és működéshez elengedhetetlen (esszenciális)</strong> technológiákat és sütiket alkalmazza:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-3 text-slate-400">
+                      <li>
+                        <strong>Cookie elfogadás állapota (Működési süti):</strong> A böngésző helyi tárhelyén (localStorage) rögzítjük, hogy Ön elfogadta-e ezt a süti nyilatkozatot. Ez megakadályozza, hogy a sötét, neon színű süti sáv minden egyes új lapbetöltésnél feleslegesen felugorjon. Élettartama: törlésig vagy manuális kiürítésig tartós.
+                      </li>
+                      <li>
+                        <strong>Google Firebase Firestore (Technikai kapcsolat):</strong> Az árajánlatkérő űrlap biztonságos továbbításához a Google Firebase felhőszolgáltatását használjuk. Ez az integráció technikai biztonsági tokeneket és munkamenet-azonosítókat használhat az űrlap illetéktelen kitöltésének (spam, botok) megakadályozására.
+                      </li>
+                      <li>
+                        <strong>Google Web Fonts (Betűtípusok betöltése):</strong> A honlap a modern és tiszta megjelenéshez Google Fonts betűtípusokat tölt be külső szerverről. Ennek során a Google technikai jellegű kapcsolat-naplózási adatokat tárolhat (pl. az Ön IP-címét a betűtípus kiszolgálásához).
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">3. Reklám célú (Marketing) sütik</h4>
+                    <p>
+                      Kifejezetten büszkék vagyunk rá, hogy honlapunk <strong>NEM használ harmadik felektől származó, agresszív marketing vagy remarketing nyomkövető sütiket</strong> (mint amilyen például a Facebook Pixel vagy a Google AdSense követőkódok). Nem mutatunk látogatóinknak célzott reklámokat, és nem árusítjuk ki a böngészési szokásaikat hirdetési hálózatoknak. Böngészése nálunk teljesen biztonságos és privát marad.
+                    </p>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">4. Sütik ellenőrzése, engedélyezése és törlése</h4>
+                    <p>
+                      Minden modern böngésző lehetővé teszi a sütik megtekintését, kezelését, egyenkénti vagy csoportos törlését, illetve a teljes letiltást is. Ha szeretné beállítani vagy korlátozni a sütik használatát, ezt a saját böngészője beállításai (biztonság/adatvédelem menüpont) alatt teheti meg:
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2 text-[11px] md:text-xs text-slate-400">
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <strong className="text-white block mb-1">Google Chrome:</strong>
+                        Beállítások &rarr; Adatvédelem és biztonság &rarr; Cookie-k és egyéb webhelyadatok.
+                      </div>
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <strong className="text-white block mb-1">Mozilla Firefox:</strong>
+                        Beállítások &rarr; Adatvédelem és biztonság &rarr; Sütik és webhelyadatok.
+                      </div>
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <strong className="text-white block mb-1">Safari (macOS / iOS):</strong>
+                        Beállítások &rarr; Adatvédelem &rarr; Sütik és webhelyadatok blokkolása.
+                      </div>
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <strong className="text-white block mb-1">Microsoft Edge:</strong>
+                        Beállítások &rarr; Cookie-k és webhelyengedélyek.
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="space-y-2">
+                    <h4 className="text-white font-bold text-sm md:text-base border-b border-white/5 pb-2">5. Jogi háttér és hozzájárulás</h4>
+                    <p>
+                      Jelen tájékoztató az elektronikus kereskedelmi szolgáltatások, valamint az információs társadalommal összefüggő szolgáltatások egyes kérdéseiről szóló 2001. évi CVIII. törvény, valamint az elektronikus hírközlésről szóló 2003. évi C. törvény 155. § (4) bekezdésével és a GDPR vonatkozó előírásaival összhangban készült.
+                    </p>
+                  </section>
+                </div>
+
+                <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+                  <p className="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest leading-relaxed">
+                    Utolsó frissítés: 2026. május 24.
+                  </p>
+                  <button 
+                    onClick={() => setShowCookiePolicy(false)}
+                    className="w-full md:w-auto bg-brand-teal text-black font-bold px-8 py-3 rounded-full text-[10px] md:text-xs uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_20px_rgba(8,247,254,0.3)]"
+                  >
+                    Megértettem és bezárom
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Cookie Consent Banner */}
+      <AnimatePresence>
+        {showCookieConsent && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            className="fixed bottom-4 left-4 right-4 md:left-6 md:right-auto md:max-w-md z-[99] bg-neutral-900/95 backdrop-blur-md border border-brand-teal/20 rounded-3xl p-6 md:p-8 shadow-[0_0_50px_rgba(8,247,254,0.15)] text-left flex flex-col gap-4"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-brand-teal/10 flex items-center justify-center text-brand-teal flex-shrink-0">
+                <Shield className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-white text-xs md:text-sm font-bold tracking-tight uppercase">Sütik (Cookie-k) használata</h4>
+                <p className="text-slate-400 text-[10px] md:text-xs font-light leading-relaxed">
+                  Honlapunk technikai és elengedhetetlen sütiket használ a biztonságos és stabil működés érdekében. Elfogadásával hozzájárul ezek használatához. Elolvashatja részletes <button onClick={() => setShowCookiePolicy(true)} className="text-brand-teal font-bold hover:underline">Süti Tájékoztatónkat</button>.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 w-full self-end mt-2">
+              <button 
+                onClick={() => setShowCookiePolicy(true)} 
+                className="flex-1 bg-white/5 text-white hover:bg-white/10 text-[10px] md:text-xs font-bold uppercase tracking-widest py-3 px-4 rounded-xl transition-all border border-white/5 text-center"
+              >
+                Részletek
+              </button>
+              <button 
+                onClick={handleAcceptCookies}
+                className="flex-1 bg-brand-teal text-black hover:bg-white text-[10px] md:text-xs font-bold uppercase tracking-widest py-3 px-4 rounded-xl transition-all text-center shadow-[0_0_15px_rgba(8,247,254,0.3)]"
+              >
+                Elfogadom
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
