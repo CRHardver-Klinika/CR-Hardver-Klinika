@@ -31,144 +31,53 @@ interface ContactFormProps {
 }
 
 function ContactForm({ onShowPrivacy }: ContactFormProps) {
-  const [formData, setFormData] = useState({ name: '', email: '', content: '' });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!acceptedPrivacy) {
-      setErrorMessage("Az adatkezelési tájékoztató elfogadása kötelező.");
-      setStatus('error');
-      return;
-    }
-    setStatus('sending');
-    setErrorMessage('');
-    try {
-      await submitMessage(formData.name, formData.email, formData.content);
-      setStatus('success');
-      setFormData({ name: '', email: '', content: '' });
-      setAcceptedPrivacy(false);
-      setTimeout(() => setStatus('idle'), 5000);
-    } catch (error: any) {
-      console.error(error);
-      setErrorMessage(error?.message || "Hiba történt a küldés során. Kérjük próbáld újra később.");
-      setStatus('error');
-    }
-  };
-
   return (
     <section id="contact" className="py-32 bg-[#0a0a0a] px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <span className="text-brand-teal font-bold tracking-[0.4em] uppercase text-xs">Kapcsolatfelvétel</span>
-              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-tight">
-                KÉRJEN <br /> <span className="text-brand-cyan">AJÁNLATOT</span>
-              </h2>
-              <p className="text-slate-400 text-lg font-light leading-relaxed max-w-md">
-                Írja meg nekünk, milyen problémát tapasztal, és kollégánk hamarosan felveszi Önnel a kapcsolatot a részletekkel.
-              </p>
+      <div className="max-w-7xl mx-auto text-center space-y-16">
+        <div className="space-y-4 max-w-3xl mx-auto">
+          <span className="text-brand-teal font-bold tracking-[0.4em] uppercase text-xs">Kapcsolatfelvétel</span>
+          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-tight">
+            KÉRJEN <span className="text-brand-cyan">AJÁNLATOT</span>
+          </h2>
+          <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed">
+            Vegye fel velünk a kapcsolatot telefonon, e-mailben, vagy írjon nekünk közvetlenül Facebook oldalunkon. Gyors és szakszerű segítség közvetlenül a szervizből!
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-4">
+          {/* Phone Card */}
+          <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-brand-teal/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center">
+            <div className="w-14 h-14 bg-brand-teal/10 rounded-2xl flex items-center justify-center text-brand-teal mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Phone className="w-6 h-6" />
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:border-brand-teal/30 transition-all">
-                <Phone className="w-6 h-6 text-brand-teal mb-4 group-hover:scale-110 transition-transform" />
-                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Hívjon minket</p>
-                <a href="tel:+36303413836" className="text-white font-bold hover:text-brand-teal transition-colors">+36 30 341 3836</a>
-              </div>
-              <div className="p-6 bg-white/5 rounded-3xl border border-white/5 group hover:border-brand-cyan/30 transition-all">
-                <Mail className="w-6 h-6 text-brand-cyan mb-4 group-hover:scale-110 transition-transform" />
-                <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-1">Írjon e-mailt</p>
-                <a href="mailto:cimpianrobert@crhardverklinika.com" className="text-white font-bold hover:text-brand-cyan transition-colors text-xs break-all">cimpianrobert@crhardverklinika.com</a>
-              </div>
-            </div>
+            <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Hívjon minket</p>
+            <a href="tel:+36303413836" className="text-white text-lg font-bold hover:text-brand-teal transition-colors tracking-wide">+36 30 341 3836</a>
           </div>
 
-          <div className="bg-neutral-900 p-8 md:p-12 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/10 blur-3xl -mr-16 -mt-16" />
-            
-            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-              <div className="space-y-2">
-                <label className="text-slate-500 text-[10px] uppercase font-bold tracking-widest ml-4">Teljes Név</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Kovács János" 
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-brand-teal/50 transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-slate-500 text-[10px] uppercase font-bold tracking-widest ml-4">E-mail Cím</label>
-                <input 
-                  required
-                  type="email" 
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="janos@pelda.hu" 
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-brand-teal/50 transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-slate-500 text-[10px] uppercase font-bold tracking-widest ml-4">Hiba leírása / Üzenet</label>
-                <textarea 
-                  required
-                  rows={4}
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                  placeholder="Milyen eszközről van szó és mi a hibajelenség?" 
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white text-sm focus:outline-none focus:border-brand-teal/50 transition-all resize-none"
-                />
-              </div>
-              
-              <div className="flex items-start gap-3 mt-4">
-                <input 
-                  required
-                  id="privacy-consent"
-                  type="checkbox"
-                  checked={acceptedPrivacy}
-                  onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                  className="mt-1 accent-brand-teal h-4 w-4 bg-white/5 border border-white/10 rounded cursor-pointer focus:ring-1 focus:ring-brand-teal focus:ring-offset-neutral-900"
-                />
-                <label htmlFor="privacy-consent" className="text-slate-400 text-xs font-light leading-normal cursor-pointer select-none">
-                  Elolvastam és elfogadom az <button type="button" onClick={onShowPrivacy} className="text-brand-teal font-bold hover:underline hover:text-brand-cyan transition-colors">Adatkezelési Tájékoztatót</button>, hozzájárulok megadott adataim kezeléséhez.
-                </label>
-              </div>
-
-              <button 
-                type="submit"
-                disabled={status === 'sending'}
-                className="w-full bg-white text-black font-black uppercase tracking-widest p-5 rounded-2xl hover:bg-brand-teal transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-              >
-                {status === 'sending' ? 'Küldés...' : 'Üzenet Küldése'}
-                <ChevronRight className="w-5 h-5" />
-              </button>
-
-              {status === 'success' && (
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  className="text-brand-teal text-center font-bold text-xs uppercase tracking-widest"
-                >
-                  Köszönjük! Üzenetedet sikeresen fogadtuk.
-                </motion.p>
-              )}
-              {status === 'error' && (
-                <div className="text-red-500 text-center space-y-2 bg-red-500/10 border border-red-500/20 p-4 rounded-xl">
-                  <p className="font-bold text-xs uppercase tracking-widest">
-                    Küldési hiba
-                  </p>
-                  <p className="text-xs text-slate-300 font-light normal-case">
-                    {errorMessage}
-                  </p>
-                </div>
-              )}
-            </form>
+          {/* Email Card */}
+          <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-brand-cyan/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center">
+            <div className="w-14 h-14 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Mail className="w-6 h-6" />
+            </div>
+            <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Írjon e-mailt</p>
+            <a href="mailto:cimpianrobert@crhardverklinika.com" className="text-white text-sm font-bold hover:text-brand-cyan transition-colors break-all">
+              cimpianrobert@crhardverklinika.com
+            </a>
           </div>
+
+          {/* Facebook Card */}
+          <a 
+            href="https://www.facebook.com/profile.php?id=61589728020534"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-[#1877F2]/40 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+          >
+            <div className="w-14 h-14 bg-[#1877F2]/10 rounded-2xl flex items-center justify-center text-[#1877F2] mb-6 group-hover:scale-110 transition-transform duration-300">
+              <Facebook className="w-6 h-6" />
+            </div>
+            <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Írjon Facebookon</p>
+            <span className="text-white text-lg font-bold group-hover:text-[#1877F2] transition-colors">CR Hardver Klinika</span>
+          </a>
         </div>
       </div>
     </section>

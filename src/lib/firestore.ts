@@ -59,12 +59,24 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 }
 
 export const submitExternalLead = async (name: string, email: string, content: string) => {
-  const endpoint = '/api/external-lead';
+  let endpoint = 'https://ais-pre-ta7a2rjrsgu3csqb4hq6o3-98336789424.europe-west2.run.app/api/external-lead';
+  
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname.includes('ais-dev-') || hostname.includes('localhost') || hostname.includes('ais-dev-ta7a2rjrsgu3csqb4hq6o3')) {
+      endpoint = 'https://ais-dev-ta7a2rjrsgu3csqb4hq6o3-98336789424.europe-west2.run.app/api/external-lead';
+    }
+  }
   
   const payload = {
     name,
+    nev: name,
     email,
-    content
+    content,
+    message: content,
+    uzenet: content,
+    secretKey: "HardverKlinika_Secure_2024_Link",
+    apiKey: "HardverKlinika_Secure_2024_Link"
   };
 
   // Set a 15-second timeout on the network request
@@ -72,7 +84,7 @@ export const submitExternalLead = async (name: string, email: string, content: s
   const id = setTimeout(() => controller.abort(), 15000);
 
   try {
-    console.log(`Sending external lead proxy request to ${endpoint}...`);
+    console.log(`Sending external lead request directly to ${endpoint}...`);
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -97,19 +109,19 @@ export const submitExternalLead = async (name: string, email: string, content: s
     }
 
     if (!response.ok) {
-      const serverError = isJson && responseData?.error ? responseData.error : `Szerver elérési válasz (${response.status})`;
+      const serverError = isJson && responseData?.error ? responseData.error : `Szerver válasza (${response.status})`;
       throw new Error(serverError);
     }
 
-    console.log("External lead proxy sent successfully:", responseData);
+    console.log("External lead sent successfully directly to CRM:", responseData);
     return true;
   } catch (error: any) {
     clearTimeout(id);
     if (error.name === 'AbortError') {
-      throw new Error("A háttérszerver nem válaszolt időben (időtúllépés, 15mp).");
+      throw new Error("A CRM szerver nem válaszolt időben (időtúllépés, 15mp).");
     }
-    console.log("[Proxy Optional Sync Status] Note: External API sync not completed (swallowed safely):", error.message || error);
-    throw new Error(error.message || 'Szerver elérési vagy hálózati hiba.');
+    console.log("[CRM Sync Status] Note: External API sync not completed:", error.message || error);
+    throw new Error(error.message || 'CRM szerver elérési vagy hálózati hiba.');
   }
 };
 
