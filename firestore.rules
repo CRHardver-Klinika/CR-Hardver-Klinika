@@ -82,6 +82,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    match /stats/{itemId} {
+      allow read: if true;
+      allow write: if itemId == 'inquiry' || isAdmin();
+    }
+
     match /messages/{messageId} {
       // Anyone can CREATE a message (contact form)
       allow create: if isValidMessage(incoming()) 

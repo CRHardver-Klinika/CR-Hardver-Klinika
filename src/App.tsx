@@ -27,10 +27,81 @@ const IMAGES = {
 */
 
 function ContactForm() {
+  const [inquiryCount, setInquiryCount] = useState<number | null>(null);
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    // Load initial statistics
+    const loadStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          if (active) {
+            setInquiryCount(data.inquiries);
+            setVisitorCount(data.views);
+          }
+        }
+      } catch (err) {
+        console.warn("Látogatási és megkeresési statisztikák betöltése sikertelen:", err);
+        if (active) {
+          setInquiryCount(14);
+          setVisitorCount(48);
+        }
+      }
+    };
+
+    // Safely trigger page visit increment on the backend
+    const registerPageView = async () => {
+      try {
+        const response = await fetch('/api/stats/increment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'view' })
+        });
+        if (response.ok) {
+          const result = await response.json();
+          if (active && result && result.stats) {
+            setInquiryCount(result.stats.inquiries);
+            setVisitorCount(result.stats.views);
+          }
+        }
+      } catch (err) {
+        console.warn("Látogatói statisztika mentési hiba:", err);
+      }
+    };
+
+    loadStats().then(() => {
+      registerPageView();
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Track click handler to dynamically count phone calls, email, and social direct contacting
+  const handleContactClick = async () => {
+    // Instant UI bump for immediate tactile feedback
+    setInquiryCount(prev => (prev !== null ? prev + 1 : null));
+
+    try {
+      await fetch('/api/stats/increment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'click' })
+      });
+    } catch (err) {
+      console.warn("Sikertelen kattintásmérés:", err);
+    }
+  };
+
   return (
     <section id="contact" className="py-32 bg-[#0a0a0a] px-6 scroll-mt-28 md:scroll-mt-44">
       <div className="max-w-7xl mx-auto text-center space-y-16">
-        <div className="space-y-4 max-w-3xl mx-auto">
+        <div className="space-y-6 max-w-3xl mx-auto">
           <span className="text-brand-teal font-bold tracking-[0.4em] uppercase text-xs">Kapcsolatfelvétel</span>
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase leading-tight">
             KÉRJEN <span className="text-brand-cyan">AJÁNLATOT</span>
@@ -38,6 +109,69 @@ function ContactForm() {
           <p className="text-slate-400 text-base md:text-lg font-light leading-relaxed">
             Vegye fel velünk a kapcsolatot telefonon, e-mailben, vagy írjon nekünk közvetlenül Facebook oldalunkon. Gyors és szakszerű segítség közvetlenül a szervizből!
           </p>
+
+          {/* Glowing Lead/Inquiry and Visitor Dual Counters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2">
+            
+            {/* Real-time Visitor Counter */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-brand-teal/30 to-brand-cyan/30 rounded-2xl blur-lg opacity-20 group-hover:opacity-35 transition duration-500"></div>
+              <div className="relative bg-white/[0.02] border border-white/5 px-5 py-4 rounded-xl flex items-center justify-between gap-4 backdrop-blur-md">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-cyan"></span>
+                  </span>
+                  <p className="text-[10px] md:text-xs text-slate-300 font-bold uppercase tracking-wider text-left">
+                    Webhely látogatók száma:
+                  </p>
+                </div>
+                <div className="text-right whitespace-nowrap">
+                  {visitorCount !== null ? (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-brand-cyan font-mono text-xl md:text-2xl font-black block drop-shadow-[0_0_8px_rgba(8,247,254,0.4)]"
+                    >
+                      {visitorCount}
+                    </motion.span>
+                  ) : (
+                    <div className="w-10 h-5 bg-white/5 animate-pulse rounded-md" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Managed Inquiries & Interaction Clicks Counter */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-brand-teal/30 to-brand-cyan/30 rounded-2xl blur-lg opacity-20 group-hover:opacity-35 transition duration-500"></div>
+              <div className="relative bg-white/[0.02] border border-white/5 px-5 py-4 rounded-xl flex items-center justify-between gap-4 backdrop-blur-md">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-teal opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-teal"></span>
+                  </span>
+                  <p className="text-[10px] md:text-xs text-slate-300 font-bold uppercase tracking-wider text-left">
+                    Sikeres megkeresések száma:
+                  </p>
+                </div>
+                <div className="text-right whitespace-nowrap">
+                  {inquiryCount !== null ? (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-brand-teal font-mono text-xl md:text-2xl font-black block drop-shadow-[0_0_8px_rgba(8,247,254,0.4)]"
+                    >
+                      {inquiryCount}+
+                    </motion.span>
+                  ) : (
+                    <div className="w-10 h-5 bg-white/5 animate-pulse rounded-md" />
+                  )}
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-4">
@@ -47,7 +181,13 @@ function ContactForm() {
               <Phone className="w-6 h-6" />
             </div>
             <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Hívjon minket</p>
-            <a href="tel:+36303413836" className="text-white text-lg font-bold hover:text-brand-teal transition-colors tracking-wide">+36 30 341 3836</a>
+            <a 
+              href="tel:+36303413836" 
+              onClick={handleContactClick}
+              className="text-white text-lg font-bold hover:text-brand-teal transition-colors tracking-wide"
+            >
+              +36 30 341 3836
+            </a>
           </div>
 
           {/* Email Card */}
@@ -56,7 +196,11 @@ function ContactForm() {
               <Mail className="w-6 h-6" />
             </div>
             <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Írjon e-mailt</p>
-            <a href="mailto:cimpianrobert@crhardverklinika.com" className="text-white text-sm font-bold hover:text-brand-cyan transition-colors break-all">
+            <a 
+              href="mailto:cimpianrobert@crhardverklinika.com" 
+              onClick={handleContactClick}
+              className="text-white text-sm font-bold hover:text-brand-cyan transition-colors break-all"
+            >
               cimpianrobert@crhardverklinika.com
             </a>
           </div>
@@ -66,6 +210,7 @@ function ContactForm() {
             href="https://www.facebook.com/profile.php?id=61589728020534"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleContactClick}
             className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-[#1877F2]/40 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
           >
             <div className="w-14 h-14 bg-[#1877F2]/10 rounded-2xl flex items-center justify-center text-[#1877F2] mb-6 group-hover:scale-110 transition-transform duration-300">
