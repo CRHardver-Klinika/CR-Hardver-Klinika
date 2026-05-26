@@ -725,14 +725,31 @@ function LandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-12 border-t border-white/10">
             {[
-              { label: "Nyitvatartás", val: "Hétfő - Szombat: 08:00 - 18:00" },
-              { label: "Átfutási idő", val: "24-72 óra" },
-              { label: "Garancia", val: "100% Bizalom" },
-              { label: "Környezet", val: "Portalanított" }
+              { 
+                label: "Nyitvatartás", 
+                val: (
+                  <>
+                    <span className="block text-white font-bold text-sm md:text-base whitespace-nowrap">Hétfő - Szombat:</span>
+                    <span className="block text-white font-bold text-sm md:text-base whitespace-nowrap">08:00 - 18:00</span>
+                  </>
+                )
+              },
+              { 
+                label: "Átfutási idő", 
+                val: <span className="block text-white font-bold text-sm md:text-base whitespace-nowrap">24-72 óra</span> 
+              },
+              { 
+                label: "Garancia", 
+                val: <span className="block text-white font-bold text-sm md:text-base whitespace-nowrap">100% Bizalom</span> 
+              },
+              { 
+                label: "Környezet", 
+                val: <span className="block text-white font-bold text-sm md:text-base whitespace-nowrap">Portalanított</span> 
+              }
             ].map((stat, i) => (
               <div key={i} className="space-y-1 min-w-fit">
                 <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">{stat.label}</p>
-                <p className="text-white font-bold text-sm md:text-base whitespace-nowrap">{stat.val}</p>
+                {stat.val}
               </div>
             ))}
           </div>
