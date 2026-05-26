@@ -32,7 +32,7 @@ interface ContactFormProps {
 
 function ContactForm({ onShowPrivacy }: ContactFormProps) {
   return (
-    <section id="contact" className="py-32 bg-[#0a0a0a] px-6">
+    <section id="contact" className="py-32 bg-[#0a0a0a] px-6 scroll-mt-28 md:scroll-mt-44">
       <div className="max-w-7xl mx-auto text-center space-y-16">
         <div className="space-y-4 max-w-3xl mx-auto">
           <span className="text-brand-teal font-bold tracking-[0.4em] uppercase text-xs">Kapcsolatfelvétel</span>
@@ -106,7 +106,7 @@ function Portfolio() {
   const filters = ['Összes', 'PC Építés', 'Szerviz', 'Karbantartás', 'Konzol'];
 
   return (
-    <section id="portfolio" className="py-32 bg-[#050505] px-6">
+    <section id="portfolio" className="py-32 bg-[#050505] px-6 scroll-mt-20 md:scroll-mt-32">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
           <div className="space-y-4">
@@ -490,7 +490,7 @@ function LandingPage() {
       </main>
 
       {/* Services Section */}
-      <section id="services" className="relative z-20 py-32 bg-black px-6">
+      <section id="services" className="relative z-20 py-32 bg-black px-6 scroll-mt-20 md:scroll-mt-32">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-20 gap-8">
             <div className="space-y-4">
@@ -547,7 +547,7 @@ function LandingPage() {
       <Portfolio />
 
       {/* Workshop Branding Section */}
-      <section id="workshop" className="relative py-48 bg-black overflow-hidden flex items-center justify-center">
+      <section id="workshop" className="relative py-48 bg-black overflow-hidden flex items-center justify-center scroll-mt-20 md:scroll-mt-32">
         <div className="absolute inset-0">
           <img 
             src={IMAGES.workshop} 
