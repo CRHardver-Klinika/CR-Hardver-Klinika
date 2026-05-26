@@ -149,7 +149,7 @@ function ContactForm() {
                       animate={{ opacity: 1, scale: 1 }}
                       className="text-brand-teal font-mono text-xl md:text-2xl font-black block drop-shadow-[0_0_8px_rgba(8,247,254,0.4)]"
                     >
-                      {inquiryCount}+
+                      {inquiryCount}
                     </motion.span>
                   ) : (
                     <div className="w-10 h-5 bg-white/5 animate-pulse rounded-md" />
