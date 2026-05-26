@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "motion/react";
 import { Cpu, Zap, Activity, HardDrive, Monitor, Phone, Mail, MapPin, Facebook, X, ChevronRight, Menu, Shield } from "lucide-react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { submitMessage } from "./lib/firestore";
+import { submitMessage, getLiveStats, incrementStatsLive } from "./lib/firestore";
 
 const IMAGES = {
   hero: "/hero.png",
@@ -33,49 +33,35 @@ function ContactForm() {
   useEffect(() => {
     let active = true;
 
-    // Load initial statistics
-    const loadStats = async () => {
+    const initStats = async () => {
+      // 1. Load initial stats
       try {
-        const response = await fetch('/api/stats');
-        if (response.ok) {
-          const data = await response.json();
-          if (active) {
-            setInquiryCount(data.inquiries);
-            setVisitorCount(data.views);
-          }
+        const data = await getLiveStats();
+        if (active) {
+          setInquiryCount(data.inquiries);
+          setVisitorCount(data.views);
         }
       } catch (err) {
-        console.warn("Látogatási és megkeresési statisztikák betöltése sikertelen:", err);
+        console.warn("Kezdeti statisztikák betöltése sikertelen:", err);
         if (active) {
           setInquiryCount(14);
           setVisitorCount(48);
         }
       }
-    };
 
-    // Safely trigger page visit increment on the backend
-    const registerPageView = async () => {
+      // 2. Increment visitor count (non-blocking) on page view
       try {
-        const response = await fetch('/api/stats/increment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'view' })
-        });
-        if (response.ok) {
-          const result = await response.json();
-          if (active && result && result.stats) {
-            setInquiryCount(result.stats.inquiries);
-            setVisitorCount(result.stats.views);
-          }
+        const stats = await incrementStatsLive('view');
+        if (active && stats) {
+          setInquiryCount(stats.inquiries);
+          setVisitorCount(stats.views);
         }
       } catch (err) {
-        console.warn("Látogatói statisztika mentési hiba:", err);
+        console.warn("Látogató regisztrálási hiba:", err);
       }
     };
 
-    loadStats().then(() => {
-      registerPageView();
-    });
+    initStats();
 
     return () => {
       active = false;
@@ -88,11 +74,11 @@ function ContactForm() {
     setInquiryCount(prev => (prev !== null ? prev + 1 : null));
 
     try {
-      await fetch('/api/stats/increment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'click' })
-      });
+      const stats = await incrementStatsLive('click');
+      if (stats) {
+        setInquiryCount(stats.inquiries);
+        setVisitorCount(stats.views);
+      }
     } catch (err) {
       console.warn("Sikertelen kattintásmérés:", err);
     }

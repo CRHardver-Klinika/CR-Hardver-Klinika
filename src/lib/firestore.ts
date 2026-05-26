@@ -7,7 +7,10 @@ import {
   getDocs, 
   orderBy,
   doc,
-  getDoc
+  getDoc,
+  updateDoc,
+  increment,
+  setDoc
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 
@@ -198,5 +201,71 @@ export const submitMessage = async (name: string, email: string, content: string
     await submitExternalLead(name, email, content);
   } catch (proxyError: any) {
     console.warn('[Proxy Warning] Secondary REST API synchronization failed:', proxyError.message);
+  }
+};
+
+export interface LiveStats {
+  inquiries: number;
+  views: number;
+}
+
+const INQUIRIES_BASE = 14;
+const VIEWS_BASE = 48;
+
+export const getLiveStats = async (): Promise<LiveStats> => {
+  try {
+    const docRef = doc(db, 'stats', 'inquiry');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const messagesCount = data.messagesCount || 0;
+      const serviceCount = data.serviceCount || 0;
+      const clicksCount = data.clicksCount || 0;
+      const viewsCount = data.viewsCount || 0;
+      return {
+        inquiries: INQUIRIES_BASE + messagesCount + serviceCount + clicksCount,
+        views: VIEWS_BASE + viewsCount
+      };
+    }
+  } catch (err) {
+    console.warn("Error reading live stats from Firestore directly:", err);
+  }
+  return { inquiries: INQUIRIES_BASE, views: VIEWS_BASE };
+};
+
+export const incrementStatsLive = async (type: 'view' | 'click'): Promise<LiveStats | null> => {
+  try {
+    const docRef = doc(db, 'stats', 'inquiry');
+    const updates: any = {};
+    if (type === 'view') {
+      updates.viewsCount = increment(1);
+    } else if (type === 'click') {
+      updates.clicksCount = increment(1);
+    }
+    updates.updatedAt = serverTimestamp();
+    
+    // Attempt updating. If document doesn't exist, we set it.
+    try {
+      await updateDoc(docRef, updates);
+    } catch (e: any) {
+      if (e.code === 'not-found') {
+        const initial: any = {
+          messagesCount: 0,
+          serviceCount: 0,
+          clicksCount: type === 'click' ? 1 : 0,
+          viewsCount: type === 'view' ? 1 : 0,
+          updatedAt: serverTimestamp()
+        };
+        await setDoc(docRef, initial, { merge: true });
+      } else {
+        throw e;
+      }
+    }
+    
+    // Return updated stats
+    return await getLiveStats();
+  } catch (err) {
+    console.warn("Error incrementing stats on Firestore directly:", err);
+    return null;
   }
 };
