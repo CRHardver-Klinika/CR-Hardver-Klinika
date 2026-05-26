@@ -212,10 +212,30 @@ export interface LiveStats {
 const INQUIRIES_BASE = 14;
 const VIEWS_BASE = 48;
 
+// Safety promise timeout wrapper with 1.5 seconds default threshold
+const withTimeout = <T>(promise: Promise<T>, ms: number = 1500): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Timeout after ${ms}ms`));
+    }, ms);
+
+    promise
+      .then((res) => {
+        clearTimeout(timer);
+        resolve(res);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+};
+
 export const getLiveStats = async (): Promise<LiveStats> => {
   try {
     const docRef = doc(db, 'stats', 'inquiry');
-    const docSnap = await getDoc(docRef);
+    // Bypasses hanging behavior due to browser adblockers or connection blockades
+    const docSnap = await withTimeout(getDoc(docRef), 1500);
     if (docSnap.exists()) {
       const data = docSnap.data();
       const messagesCount = data.messagesCount || 0;
@@ -227,8 +247,8 @@ export const getLiveStats = async (): Promise<LiveStats> => {
         views: VIEWS_BASE + viewsCount
       };
     }
-  } catch (err) {
-    console.warn("Error reading live stats from Firestore directly:", err);
+  } catch (err: any) {
+    console.warn("[getLiveStats] Direct Firestore retrieval timed out or failed. Utilizing fallbacks:", err.message || err);
   }
   return { inquiries: INQUIRIES_BASE, views: VIEWS_BASE };
 };
@@ -244,10 +264,18 @@ export const incrementStatsLive = async (type: 'view' | 'click'): Promise<LiveSt
     }
     updates.updatedAt = serverTimestamp();
     
-    // Attempt updating. If document doesn't exist, we set it.
+    // Try updating with a robust timeout constraint
     try {
-      await updateDoc(docRef, updates);
+      await withTimeout(updateDoc(docRef, updates), 1500);
     } catch (e: any) {
+      if (e.message && e.message.includes('Timeout')) {
+        console.warn("[incrementStatsLive] Timeout during update. Serving instant local increment fallback.");
+        return {
+          inquiries: INQUIRIES_BASE + (type === 'click' ? 1 : 0),
+          views: VIEWS_BASE + (type === 'view' ? 1 : 0)
+        };
+      }
+      
       if (e.code === 'not-found') {
         const initial: any = {
           messagesCount: 0,
@@ -256,16 +284,20 @@ export const incrementStatsLive = async (type: 'view' | 'click'): Promise<LiveSt
           viewsCount: type === 'view' ? 1 : 0,
           updatedAt: serverTimestamp()
         };
-        await setDoc(docRef, initial, { merge: true });
+        await withTimeout(setDoc(docRef, initial, { merge: true }), 1500);
       } else {
         throw e;
       }
     }
     
-    // Return updated stats
+    // Safely retrieve the stats, guaranteed by the inner 1.5s timeout
     return await getLiveStats();
-  } catch (err) {
-    console.warn("Error incrementing stats on Firestore directly:", err);
-    return null;
+  } catch (err: any) {
+    console.warn("[incrementStatsLive] Error updating stats on Firestore. Handling with fallback:", err.message || err);
+    // Instant local optimistic update to continue giving immediate tactile feedback on clicked items
+    return { 
+      inquiries: INQUIRIES_BASE + (type === 'click' ? 1 : 0), 
+      views: VIEWS_BASE + (type === 'view' ? 1 : 0) 
+    };
   }
 };

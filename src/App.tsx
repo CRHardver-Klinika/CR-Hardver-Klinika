@@ -70,8 +70,9 @@ function ContactForm() {
 
   // Track click handler to dynamically count phone calls, email, and social direct contacting
   const handleContactClick = async () => {
-    // Instant UI bump for immediate tactile feedback
-    setInquiryCount(prev => (prev !== null ? prev + 1 : null));
+    // Instant UI bump for immediate tactile feedback. 
+    // If we're still loading (null), we immediately display 15 (INQUIRIES_BASE + 1) so that the user receives instant tactile feedback.
+    setInquiryCount(prev => (prev !== null ? prev + 1 : 15));
 
     try {
       const stats = await incrementStatsLive('click');
@@ -162,34 +163,34 @@ function ContactForm() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-4">
           {/* Phone Card */}
-          <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-brand-teal/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center">
+          <a 
+            href="tel:+36303413836" 
+            onClick={handleContactClick}
+            className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-brand-teal/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+          >
             <div className="w-14 h-14 bg-brand-teal/10 rounded-2xl flex items-center justify-center text-brand-teal mb-6 group-hover:scale-110 transition-transform duration-300">
               <Phone className="w-6 h-6" />
             </div>
             <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Hívjon minket</p>
-            <a 
-              href="tel:+36303413836" 
-              onClick={handleContactClick}
-              className="text-white text-lg font-bold hover:text-brand-teal transition-colors tracking-wide"
-            >
+            <span className="text-white text-lg font-bold group-hover:text-brand-teal transition-colors tracking-wide">
               +36 30 341 3836
-            </a>
-          </div>
+            </span>
+          </a>
 
           {/* Email Card */}
-          <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-brand-cyan/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center">
+          <a 
+            href="mailto:cimpianrobert@crhardverklinika.com?subject=Érdeklődés / Árajánlat kérés - CR Hardver Klinika&body=Kedves CR Hardver Klinika!%0D%0A%0D%0AAz alábbi hibával/kéréssel kapcsolatban szeretnék segítséget kérni:%0D%0A%0D%0A[Kérjük, írja le a készülék típusát és a tapasztalt problémát]%0D%0A%0D%0AKöszönettel:%0D%0A[Az Ön neve]%0D%0A[Telefonszáma]"
+            onClick={handleContactClick}
+            className="p-8 bg-white/5 rounded-[2rem] border border-white/5 group hover:border-brand-cyan/30 hover:bg-white/[0.07] transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+          >
             <div className="w-14 h-14 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-6 group-hover:scale-110 transition-transform duration-300">
               <Mail className="w-6 h-6" />
             </div>
             <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest mb-2">Írjon e-mailt</p>
-            <a 
-              href="mailto:cimpianrobert@crhardverklinika.com" 
-              onClick={handleContactClick}
-              className="text-white text-sm font-bold hover:text-brand-cyan transition-colors break-all"
-            >
+            <span className="text-white text-sm font-bold group-hover:text-brand-cyan transition-colors break-all">
               cimpianrobert@crhardverklinika.com
-            </a>
-          </div>
+            </span>
+          </a>
 
           {/* Facebook Card */}
           <a 
@@ -729,9 +730,9 @@ function LandingPage() {
               { label: "Garancia", val: "100% Bizalom" },
               { label: "Környezet", val: "Portalanított" }
             ].map((stat, i) => (
-              <div key={i} className="space-y-1">
+              <div key={i} className="space-y-1 min-w-fit">
                 <p className="text-slate-500 text-[10px] uppercase font-bold tracking-widest">{stat.label}</p>
-                <p className="text-white font-bold text-sm md:text-base">{stat.val}</p>
+                <p className="text-white font-bold text-sm md:text-base whitespace-nowrap">{stat.val}</p>
               </div>
             ))}
           </div>
