@@ -797,7 +797,7 @@ function LandingPage() {
                 <li>
                   <button 
                     onClick={() => setShowTerms(true)} 
-                    className="hover:text-brand-teal transition-colors text-left cursor-pointer font-light block animate-pulse hover:animate-none"
+                    className="hover:text-brand-teal transition-colors text-left cursor-pointer font-light block"
                   >
                     Általános Szerződési Feltételek (ÁSZF)
                   </button>
