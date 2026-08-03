@@ -1,10 +1,10 @@
-import { 
-  collection, 
-  addDoc, 
-  serverTimestamp, 
-  query, 
-  where, 
-  getDocs, 
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
   orderBy,
   doc,
   getDoc,
@@ -63,14 +63,18 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
 export const submitExternalLead = async (name: string, email: string, content: string) => {
   let endpoint = 'https://ais-pre-ta7a2rjrsgu3csqb4hq6o3-98336789424.europe-west2.run.app/api/external-lead';
-  
+
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname.includes('ais-dev-') || hostname.includes('localhost') || hostname.includes('ais-dev-ta7a2rjrsgu3csqb4hq6o3')) {
       endpoint = 'https://ais-dev-ta7a2rjrsgu3csqb4hq6o3-98336789424.europe-west2.run.app/api/external-lead';
     }
   }
-  
+
+  // BIZTONSÁGI MEGJEGYZÉS: a korábbi verzióban itt egy fix "titkos" kulcs szerepelt
+  // kliens oldali kódban, ami bárki számára láthatóvá tette a böngésző fejlesztői
+  // eszközeiben. A hitelesítést a szerver oldalra (server.ts) helyeztük át, ahol
+  // az API kulcs csak a process.env-ből, biztonságosan érhető el.
   const payload = {
     name,
     nev: name,
@@ -78,8 +82,6 @@ export const submitExternalLead = async (name: string, email: string, content: s
     content,
     message: content,
     uzenet: content,
-    secretKey: "HardverKlinika_Secure_2024_Link",
-    apiKey: "HardverKlinika_Secure_2024_Link"
   };
 
   // Set a 15-second timeout on the network request
@@ -96,7 +98,7 @@ export const submitExternalLead = async (name: string, email: string, content: s
       body: JSON.stringify(payload),
       signal: controller.signal
     });
-    
+
     clearTimeout(id);
 
     // Read response safely as text first to bypass any HTML/non-JSON schema errors
@@ -131,7 +133,7 @@ export const submitExternalLead = async (name: string, email: string, content: s
 export const submitMessage = async (name: string, email: string, content: string) => {
   const path = 'messages';
   const ownerId = "L7bYE6FvjKOKyNBsXayUYZnWAVw1";
-  
+
   // 1. Save directly to the 'messages' collection
   try {
     const docRef = await addDoc(collection(db, path), {
@@ -174,28 +176,13 @@ export const submitMessage = async (name: string, email: string, content: string
     console.error('Core Firestore write to service collection failed:', serviceError);
   }
 
-  // 3. Save directly to 'services' collection (just in case the other uses services)
-  try {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const servicesDocRef = await addDoc(collection(db, "services"), {
-      ownerId: ownerId,
-      workName: "Web Ajánlatkérés", // Filtering condition for Weboldal megkeresés
-      date: todayStr,
-      client: name,
-      phone: "",
-      email: email,
-      address: "",
-      device: "Weboldal megkeresés",
-      issue: content,
-      status: "Folyamatban",
-      createdAt: serverTimestamp()
-    });
-    console.log('Successfully wrote web lead directly to services collection:', servicesDocRef.id);
-  } catch (servicesError: any) {
-    console.error('Core Firestore write to services collection failed:', servicesError);
-  }
+  // MEGJEGYZÉS: korábban itt egy harmadik, "services" (többes szám) nevű Firestore
+  // gyűjteménybe is íródott ugyanaz az adat, "biztos, ami biztos" alapon. Ez feleslegesen
+  // duplikálta a CRM-ben megjelenő megkereséseket. Ha a CRM rendszered ténylegesen a
+  // "services" (többes szám) gyűjteményt használja a "service" (egyes szám) helyett,
+  // szólj, és visszaállítom — de csak az egyiket, ne mindkettőt egyszerre.
 
-  // 4. Attempt secondary proxy synchronization to the database app's REST API (non-blocking fallback)
+  // 3. Attempt secondary proxy synchronization to the database app's REST API (non-blocking fallback)
   try {
     console.log('Synchronizing lead over REST proxy to database app...');
     await submitExternalLead(name, email, content);
@@ -231,7 +218,7 @@ const withTimeout = <T>(promise: Promise<T>, ms: number = 1500): Promise<T> => {
   });
 };
 
-export const getLiveStats = async (): Promise<LiveStats> => {
+export const getLiveStats = async (): Promise<LiveStats | null> => {
   try {
     const docRef = doc(db, 'stats', 'inquiry');
     // Bypasses hanging behavior due to browser adblockers or connection blockades
@@ -248,9 +235,13 @@ export const getLiveStats = async (): Promise<LiveStats> => {
       };
     }
   } catch (err: any) {
-    console.warn("[getLiveStats] Direct Firestore retrieval timed out or failed. Utilizing fallbacks:", err.message || err);
+    console.warn("[getLiveStats] Direct Firestore retrieval timed out or failed:", err.message || err);
   }
-  return { inquiries: INQUIRIES_BASE, views: VIEWS_BASE };
+  // MEGJEGYZÉS: korábban itt kitalált (INQUIRIES_BASE/VIEWS_BASE) számokat adtunk vissza
+  // valós adatként, ha a Firestore lekérdezés sikertelen volt. Ez megtévesztő lehet a
+  // látogatók számára, ezért most null-t adunk vissza, a felület pedig ilyenkor egyszerűen
+  // nem jeleníti meg a számlálót valós adat hiányában.
+  return null;
 };
 
 export const incrementStatsLive = async (type: 'view' | 'click'): Promise<LiveStats | null> => {
@@ -263,19 +254,16 @@ export const incrementStatsLive = async (type: 'view' | 'click'): Promise<LiveSt
       updates.clicksCount = increment(1);
     }
     updates.updatedAt = serverTimestamp();
-    
+
     // Try updating with a robust timeout constraint
     try {
       await withTimeout(updateDoc(docRef, updates), 1500);
     } catch (e: any) {
       if (e.message && e.message.includes('Timeout')) {
-        console.warn("[incrementStatsLive] Timeout during update. Serving instant local increment fallback.");
-        return {
-          inquiries: INQUIRIES_BASE + (type === 'click' ? 1 : 0),
-          views: VIEWS_BASE + (type === 'view' ? 1 : 0)
-        };
+        console.warn("[incrementStatsLive] Timeout during update.");
+        return null;
       }
-      
+
       if (e.code === 'not-found') {
         const initial: any = {
           messagesCount: 0,
@@ -289,15 +277,13 @@ export const incrementStatsLive = async (type: 'view' | 'click'): Promise<LiveSt
         throw e;
       }
     }
-    
+
     // Safely retrieve the stats, guaranteed by the inner 1.5s timeout
     return await getLiveStats();
   } catch (err: any) {
-    console.warn("[incrementStatsLive] Error updating stats on Firestore. Handling with fallback:", err.message || err);
-    // Instant local optimistic update to continue giving immediate tactile feedback on clicked items
-    return { 
-      inquiries: INQUIRIES_BASE + (type === 'click' ? 1 : 0), 
-      views: VIEWS_BASE + (type === 'view' ? 1 : 0) 
-    };
+    console.warn("[incrementStatsLive] Error updating stats on Firestore:", err.message || err);
+    // MEGJEGYZÉS: korábban itt is kitalált számokat adtunk vissza. Most inkább null-t adunk,
+    // a felület pedig ilyenkor egyszerűen nem mutatja a számlálót valós adat hiányában.
+    return null;
   }
 };

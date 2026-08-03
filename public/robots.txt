@@ -1,28 +1,4 @@
-User-agent: Googlebot-Image
-Disallow: /
-
 User-agent: *
-Allow: /logo.png
-Allow: /logo_square.png
-Allow: /favicon.ico
-Allow: /favicon.png
-Allow: /apple-touch-icon.png
-Disallow: /*.png$
-Disallow: /*.jpg$
-Disallow: /*.jpeg$
-Disallow: /*.gif$
-Disallow: /*.webp$
-Disallow: /*.svg$
-Disallow: /hero.png
-Disallow: /gpu_zoom.png
-Disallow: /devices.png
-Disallow: /cpu_detail.png
-Disallow: /p1.jpg
-Disallow: /p2.jpg
-Disallow: /p3.jpg
-Disallow: /p4.jpg
-Disallow: /p5.jpg
-Disallow: /p6.jpg
-Disallow: /p7.jpg
-Disallow: /p8.jpg
-Disallow: /p9.jpg
+Allow: /
+
+Sitemap: https://cr-hardver-klinika.com/sitemap.xml

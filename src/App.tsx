@@ -37,16 +37,12 @@ function ContactForm() {
       // 1. Load initial stats
       try {
         const data = await getLiveStats();
-        if (active) {
+        if (active && data) {
           setInquiryCount(data.inquiries);
           setVisitorCount(data.views);
         }
       } catch (err) {
         console.warn("Kezdeti statisztikák betöltése sikertelen:", err);
-        if (active) {
-          setInquiryCount(14);
-          setVisitorCount(48);
-        }
       }
 
       // 2. Increment visitor count (non-blocking) on page view
@@ -70,9 +66,10 @@ function ContactForm() {
 
   // Track click handler to dynamically count phone calls, email, and social direct contacting
   const handleContactClick = async () => {
-    // Instant UI bump for immediate tactile feedback. 
-    // If we're still loading (null), we immediately display 15 (INQUIRIES_BASE + 1) so that the user receives instant tactile feedback.
-    setInquiryCount(prev => (prev !== null ? prev + 1 : 15));
+    // Instant UI bump for immediate tactile feedback if counters are already visible.
+    if (inquiryCount !== null) {
+      setInquiryCount(prev => prev + 1);
+    }
 
     try {
       const stats = await incrementStatsLive('click');
@@ -98,23 +95,23 @@ function ContactForm() {
           </p>
 
           {/* Glowing Lead/Inquiry and Visitor Dual Counters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2">
-            
-            {/* Real-time Visitor Counter */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-brand-teal/30 to-brand-cyan/30 rounded-2xl blur-lg opacity-20 group-hover:opacity-35 transition duration-500"></div>
-              <div className="relative bg-white/[0.02] border border-white/5 px-5 py-4 rounded-xl flex items-center justify-between gap-4 backdrop-blur-md">
-                <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-cyan"></span>
-                  </span>
-                  <p className="text-[10px] md:text-xs text-slate-300 font-bold uppercase tracking-wider text-left">
-                    Webhely látogatók száma:
-                  </p>
-                </div>
-                <div className="text-right whitespace-nowrap">
-                  {visitorCount !== null ? (
+          {visitorCount !== null && inquiryCount !== null && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2">
+              
+              {/* Real-time Visitor Counter */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-brand-teal/30 to-brand-cyan/30 rounded-2xl blur-lg opacity-20 group-hover:opacity-35 transition duration-500"></div>
+                <div className="relative bg-white/[0.02] border border-white/5 px-5 py-4 rounded-xl flex items-center justify-between gap-4 backdrop-blur-md">
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-cyan"></span>
+                    </span>
+                    <p className="text-[10px] md:text-xs text-slate-300 font-bold uppercase tracking-wider text-left">
+                      Webhely látogatók száma:
+                    </p>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
                     <motion.span
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -122,28 +119,24 @@ function ContactForm() {
                     >
                       {visitorCount}
                     </motion.span>
-                  ) : (
-                    <div className="w-10 h-5 bg-white/5 animate-pulse rounded-md" />
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Managed Inquiries & Interaction Clicks Counter */}
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-brand-teal/30 to-brand-cyan/30 rounded-2xl blur-lg opacity-20 group-hover:opacity-35 transition duration-500"></div>
-              <div className="relative bg-white/[0.02] border border-white/5 px-5 py-4 rounded-xl flex items-center justify-between gap-4 backdrop-blur-md">
-                <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-teal opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-teal"></span>
-                  </span>
-                  <p className="text-[10px] md:text-xs text-slate-300 font-bold uppercase tracking-wider text-left">
-                    Sikeres megkeresések száma:
-                  </p>
-                </div>
-                <div className="text-right whitespace-nowrap">
-                  {inquiryCount !== null ? (
+              {/* Managed Inquiries & Interaction Clicks Counter */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-brand-teal/30 to-brand-cyan/30 rounded-2xl blur-lg opacity-20 group-hover:opacity-35 transition duration-500"></div>
+                <div className="relative bg-white/[0.02] border border-white/5 px-5 py-4 rounded-xl flex items-center justify-between gap-4 backdrop-blur-md">
+                  <div className="flex items-center gap-2.5">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-teal opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-teal"></span>
+                    </span>
+                    <p className="text-[10px] md:text-xs text-slate-300 font-bold uppercase tracking-wider text-left">
+                      Sikeres megkeresések száma:
+                    </p>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
                     <motion.span
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -151,14 +144,12 @@ function ContactForm() {
                     >
                       {inquiryCount}
                     </motion.span>
-                  ) : (
-                    <div className="w-10 h-5 bg-white/5 animate-pulse rounded-md" />
-                  )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-          </div>
+            </div>
+          )}
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto pt-4">
@@ -365,21 +356,21 @@ function LandingPage() {
 
   // Section 1: Hero to CPU (0 to 0.33)
   const heroScale = useTransform(smoothProgress, [0, 0.25], [1, 3.5]);
-  const heroOpacity = useTransform(smoothProgress, [0.2, 0.3], [1, 0]);
+    const heroOpacity = useTransform(smoothProgress, [0.16, 0.22], [1, 0]);
   const heroX = useTransform(smoothProgress, [0, 0.25], ["0%", "5%"]);
   const heroY = useTransform(smoothProgress, [0, 0.25], ["0%", "-10%"]);
 
   // Section 2: CPU Detail (0.25 to 0.66)
   const cpuScale = useTransform(smoothProgress, [0.15, 0.3, 0.5, 0.6], [0.8, 1, 1.2, 2]);
-  const cpuOpacity = useTransform(smoothProgress, [0.15, 0.25, 0.55, 0.65], [0, 1, 1, 0]);
-  
+    const cpuOpacity = useTransform(smoothProgress, [0.16, 0.22, 0.5, 0.56], [0, 1, 1, 0]);
+
   // Section 3: GPU Zoom (0.55 to 0.85)
   const gpuScale = useTransform(smoothProgress, [0.5, 0.65, 0.8, 0.9], [0.8, 1, 1.2, 2]);
-  const gpuOpacity = useTransform(smoothProgress, [0.5, 0.6, 0.85, 0.95], [0, 1, 1, 0]);
+    const gpuOpacity = useTransform(smoothProgress, [0.5, 0.56, 0.8, 0.86], [0, 1, 1, 0]);
 
   // Section 4: Devices (0.85 to 1)
   const devicesScale = useTransform(smoothProgress, [0.8, 0.95, 1], [1.2, 1, 1]);
-  const devicesOpacity = useTransform(smoothProgress, [0.85, 0.95], [0, 1]);
+    const devicesOpacity = useTransform(smoothProgress, [0.8, 0.86], [0, 1]);
 
   return (
     <div className="relative bg-black" id="top">
@@ -558,20 +549,7 @@ function LandingPage() {
           </motion.div>
 
           {/* Layer 3: GPU Zoom */}
-          <motion.div 
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ scale: gpuScale, opacity: gpuOpacity }}
-          >
-            <img 
-              src={IMAGES.gpu} 
-              alt="GPU" 
-              className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 cinematic-vignette pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" />
-
-            <div className="absolute top-32 md:top-48 left-6 md:left-12 right-6 md:right-auto space-y-6">
+<motion.div className="absolute inset-0 flex items-center justify-center" style={{ scale: gpuScale, opacity: gpuOpacity }}><img src={IMAGES.gpu} alt="GPU" className="w-full h-full object-cover" referrerPolicy="no-referrer" /><div className="absolute inset-0 cinematic-vignette pointer-events-none" /><div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-transparent" /><div className="absolute top-32 md:top-48 left-10 md:left-20 right-6 md:right-auto space-y-6">
               <div className="flex items-center gap-2 text-brand-cyan">
                 <Zap className="w-6 h-6 fill-brand-cyan" />
                 <span className="text-xs font-bold tracking-[0.3em] uppercase">Graphics Performance</span>
@@ -887,31 +865,74 @@ function LandingPage() {
                   </button>
                 </div>
 
-                <div className="overflow-x-auto -mx-2">
-                  <table className="w-full text-left min-w-[500px] md:min-w-0">
-                    <thead>
-                      <tr className="text-slate-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-white/5">
-                        <th className="pb-4 font-bold">Szolgáltatás</th>
-                        <th className="pb-4 font-bold">Tartalom</th>
-                        <th className="pb-4 font-bold text-right">Javasolt Ár</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {[
-                        { service: "Klinikai Tisztítás", content: "Portalanítás + Prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
-                        { service: "Szoftveres Frissítés", content: "Op. rendszer telepítés + Driverek", price: "10.000 - 12.000 Ft" },
-                        { service: "Adatmentés", content: "Törölt adatok visszaállítása / Mentés", price: "8.000 Ft-tól" },
-                        { service: "Hardveres Upgrade", content: "SSD/RAM beszerelés és beüzemelés", price: "6.000 Ft + alkatrész" },
-                        { service: "PC Építés", content: "Profi összeszerelés & OS telepítés", price: "15.000 - 35.000 Ft" }
-                      ].map((item, i) => (
-                        <tr key={i} className="group">
-                          <td className="py-4 md:py-6 text-white font-bold text-xs md:text-sm">{item.service}</td>
-                          <td className="py-4 md:py-6 text-slate-400 text-[10px] md:text-xs font-light">{item.content}</td>
-                          <td className="py-4 md:py-6 text-brand-cyan font-bold text-xs md:text-sm text-right whitespace-nowrap">{item.price}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 pt-2">
+                  {/* Számítógép & Laptop Szolgáltatások */}
+                  <div className="space-y-4">
+                    <h4 className="text-white font-bold text-xs md:text-sm uppercase tracking-wider border-b border-white/10 pb-3 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
+                      Számítógép & Laptop Szerviz
+                    </h4>
+                    <div className="overflow-x-auto -mx-2 lg:mx-0">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="text-slate-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-white/5">
+                            <th className="pb-3 font-bold">Szolgáltatás</th>
+                            <th className="pb-3 font-bold">Tartalom</th>
+                            <th className="pb-3 font-bold text-right">Javasolt Ár</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {[
+                            { service: "Klinikai Tisztítás", content: "Portalanítás + Prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
+                            { service: "Szoftveres Frissítés", content: "Op. rendszer telepítés + Driverek", price: "10.000 - 12.000 Ft" },
+{ service: "Adatmentés", content: "Törölt adatok visszaállítása / Mentés (a hiba jellegétől függ)", price: "8.000 Ft-tól" },
+                            { service: "Hardveres Upgrade", content: "SSD/RAM beszerelés és beüzemelés (bonyolultabb munkánál eltérhet)", price: "6.000 Ft + alkatrész" },
+{ service: "PC Építés", content: "Profi összeszerelés & OS telepítés", price: "15.000 - 50.000 Ft" }
+                          ].map((item, i) => (
+                            <tr key={i} className="group">
+                              <td className="py-3 md:py-4 text-white font-bold text-xs md:text-sm">{item.service}</td>
+                              <td className="py-3 md:py-4 text-slate-400 text-[10px] md:text-xs font-light">{item.content}</td>
+                              <td className="py-3 md:py-4 text-brand-cyan font-bold text-xs md:text-sm text-right">{item.price}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Konzol Karbantartás Szolgáltatások */}
+                  <div className="space-y-4">
+                    <h4 className="text-white font-bold text-xs md:text-sm uppercase tracking-wider border-b border-white/10 pb-3 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+                      Konzol Karbantartás
+                    </h4>
+                    <div className="overflow-x-auto -mx-2 lg:mx-0">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="text-slate-500 text-[9px] md:text-[10px] uppercase font-bold tracking-widest border-b border-white/5">
+                            <th className="pb-3 font-bold">Konzol Típus</th>
+                            <th className="pb-3 font-bold">Tartalom</th>
+                            <th className="pb-3 font-bold text-right">Javasolt Ár</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                          {[
+                            { service: "PlayStation 4 széria", content: "Klinikai tisztítás + prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
+                            { service: "PlayStation 5", content: "Portalanítás + Folyékony fém igazítás / pótlás", price: "18.000 - 22.000 Ft" },
+                            { service: "Xbox One széria", content: "Klinikai tisztítás + prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
+                            { service: "Xbox Series S / X", content: "Teljes belső tisztítás + újrapasztázás", price: "15.000 - 18.000 Ft" },
+                            { service: "Nintendo Switch / Lite", content: "Belső tisztítás + újrapasztázás + ventilátor szerviz", price: "10.000 - 14.000 Ft" }
+                          ].map((item, i) => (
+                            <tr key={i} className="group">
+                              <td className="py-3 md:py-4 text-white font-bold text-xs md:text-sm">{item.service}</td>
+                              <td className="py-3 md:py-4 text-slate-400 text-[10px] md:text-xs font-light">{item.content}</td>
+                              <td className="py-3 md:py-4 text-brand-cyan font-bold text-xs md:text-sm text-right">{item.price}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 md:pt-10">
@@ -938,7 +959,7 @@ function LandingPage() {
 
                 <div className="pt-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
                   <div className="space-y-1 text-center md:text-left">
-                    <p className="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest">Az árak tájékoztató jellegűek.</p>
+                    <p className="text-slate-500 text-[9px] md:text-[10px] uppercase tracking-widest">Az árak tájékoztató jellegűek és ÁFA-mentesek (alanyi adómentes vállalkozás).</p>
                     <p className="text-slate-400 text-[9px] md:text-[10px]">
                       Ha vissza szeretne lépni, kattintson az árlista ablak melletti sötét területre.
                     </p>
