@@ -361,11 +361,11 @@ function LandingPage() {
   const heroY = useTransform(smoothProgress, [0, 0.25], ["0%", "-10%"]);
 
   // Section 2: CPU Detail (0.25 to 0.66)
-  const cpuScale = useTransform(smoothProgress, [0.15, 0.3, 0.5, 0.6], [0.8, 1, 1.2, 2]);
+    const cpuScale = useTransform(smoothProgress, [0.15, 0.3, 0.5, 0.6], [1, 1, 1.2, 2]);
     const cpuOpacity = useTransform(smoothProgress, [0.16, 0.22, 0.5, 0.56], [0, 1, 1, 0]);
 
   // Section 3: GPU Zoom (0.55 to 0.85)
-  const gpuScale = useTransform(smoothProgress, [0.5, 0.65, 0.8, 0.9], [0.8, 1, 1.2, 2]);
+    const gpuScale = useTransform(smoothProgress, [0.5, 0.65, 0.8, 0.9], [1, 1, 1.2, 2]);
     const gpuOpacity = useTransform(smoothProgress, [0.5, 0.56, 0.8, 0.86], [0, 1, 1, 0]);
 
   // Section 4: Devices (0.85 to 1)
@@ -887,7 +887,7 @@ function LandingPage() {
                             { service: "Szoftveres Frissítés", content: "Op. rendszer telepítés + Driverek", price: "10.000 - 12.000 Ft" },
 { service: "Adatmentés", content: "Törölt adatok visszaállítása / Mentés (a hiba jellegétől függ)", price: "8.000 Ft-tól" },
                             { service: "Hardveres Upgrade", content: "SSD/RAM beszerelés és beüzemelés (bonyolultabb munkánál eltérhet)", price: "6.000 Ft + alkatrész" },
-{ service: "PC Építés", content: "Profi összeszerelés & OS telepítés", price: "15.000 - 50.000 Ft" }
+{ service: "PC Építés", content: "Profi összeszerelés & Op. rendszer telepítés", price: "15.000 - 50.000 Ft" }, { service: "Diagnosztika", content: "A hiba nehézségétől függ, javítás esetén levonjuk az árból", price: "2.000 - 5.000 Ft" }
                           ].map((item, i) => (
                             <tr key={i} className="group">
                               <td className="py-3 md:py-4 text-white font-bold text-xs md:text-sm">{item.service}</td>
@@ -917,11 +917,11 @@ function LandingPage() {
                         </thead>
                         <tbody className="divide-y divide-white/5">
                           {[
-                            { service: "PlayStation 4 széria", content: "Klinikai tisztítás + prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
+                            { service: "PlayStation 4 széria", content: "Klinikai tisztítás + Prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
                             { service: "PlayStation 5", content: "Portalanítás + Folyékony fém igazítás / pótlás", price: "18.000 - 22.000 Ft" },
-                            { service: "Xbox One széria", content: "Klinikai tisztítás + prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
-                            { service: "Xbox Series S / X", content: "Teljes belső tisztítás + újrapasztázás", price: "15.000 - 18.000 Ft" },
-                            { service: "Nintendo Switch / Lite", content: "Belső tisztítás + újrapasztázás + ventilátor szerviz", price: "10.000 - 14.000 Ft" }
+                            { service: "Xbox One széria", content: "Klinikai tisztítás + Prémium újrapasztázás", price: "12.000 - 15.000 Ft" },
+                            { service: "Xbox Series S / X", content: "Teljes belső tisztítás + Újrapasztázás", price: "15.000 - 18.000 Ft" },
+                            { service: "Nintendo Switch / Lite", content: "Belső tisztítás + Újrapasztázás + Ventilátor szerviz", price: "10.000 - 14.000 Ft" }, { service: "Diagnosztika", content: "A hiba nehézségétől függ, javítás esetén levonjuk az árból", price: "2.000 - 5.000 Ft" }
                           ].map((item, i) => (
                             <tr key={i} className="group">
                               <td className="py-3 md:py-4 text-white font-bold text-xs md:text-sm">{item.service}</td>
@@ -951,7 +951,7 @@ function LandingPage() {
                       Környék & Falvak
                     </h4>
                     <p className="text-slate-400 text-[10px] md:text-xs font-light leading-relaxed">
-                      Fix <span className="text-white font-bold">3-4e Ft</span> kiszállás. 
+                      Fix <span className="text-white font-bold">4.000 Ft</span> kiszállás.
                       <span className="block mt-1 text-brand-cyan font-medium italic">25.000 Ft felett ingyenes!</span>
                     </p>
                   </div>
